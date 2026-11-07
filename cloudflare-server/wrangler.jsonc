@@ -18,9 +18,8 @@
   ],
   "vars": {
     "ALLOW_GUESTS": "1",
-    "SUPABASE_URL": "https://c--b70204ff-919a-42d9-a9c8-6e8bd8c8f651-prod.lovable.cloud",
-    "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_kk2pDHMXim4NwFbM3va52g_pwJq_SSv",
-    "APP_URL": "https://ars-anima-questmates.lovable.app"
+    "SUPABASE_URL": "https://bzjxhczkecjmalpfxecp.supabase.co",
+    "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_0CS-v8yneNR3cTi0McoVzQ_HIrdYZY8"
   }
   // Secreto (no va aquí): npx wrangler secret put MP_SERVER_SECRET
 }

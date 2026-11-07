@@ -212,3 +212,8 @@
 - [x] Servidor de salas publicado verificado con 4 clientes.
 - [ ] Publicar el servidor actualizado en Cloudflare — espera el token de Cloudflare del usuario.
 - [ ] Mover el ranking del juego viejo — su base de datos está en otra cuenta, sin acceso.
+- [x] Servidor de salas publicado en Cloudflare (gratis) apuntando al backend de este proyecto
+- [x] Publicación automática del servidor desde GitHub (falta: el usuario añade 2 secretos en GitHub)
+- [x] Pestaña ESTRATEGA con estrategia por IA del encuentro actual
+- [x] AGENTS.md principal bajo el límite
+- [ ] Guardar resultados multijugador online (bloqueado: publicar la app y fijar su dirección en el servidor)
