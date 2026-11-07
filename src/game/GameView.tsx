@@ -44,6 +44,7 @@ import { Button } from '@/components/ui/button';
 import { HybridRenderer } from './gfx/hybrid';
 import { GfxPanel, GfxStats } from './GfxPanel';
 import { PerfOverlay, PerfAdvisor } from './PerfPanel';
+import { LiveStrategist } from './LiveStrategist';
 import { perf } from './perf-monitor';
 import { gfxStore } from './gfx/settings';
 import { CameraPanel } from './CameraPanel';
@@ -832,7 +833,7 @@ function RecapView({ g, head, next, onNext }: { g: Game; head?: React.ReactNode;
 }
 
 function Menu({ g, rerender, touch, pad }: { g: Game; rerender: () => void; touch: boolean; pad: boolean }) {
-  const tabs = ["crónicas", "estadísticas", "wiki", "progreso", "pisos", "xp", "personaje", "mapa", "legado", "mochila", ...(g.palim.hasBook ? ["palimpsestos"] : []), "clase", "pactos", "habilidades", "crafteo", "diario", "misiones", "encuentros", "ajustes", "mando", ...(g.shopStock.length || g.menuTab === "tienda" ? ["tienda"] : [])];
+  const tabs = ["crónicas", "estadísticas", "wiki", "progreso", "pisos", "xp", "personaje", "mapa", "legado", "mochila", ...(g.palim.hasBook ? ["palimpsestos"] : []), "clase", "pactos", "habilidades", "crafteo", "diario", "misiones", "encuentros", "estratega", "ajustes", "mando", ...(g.shopStock.length || g.menuTab === "tienda" ? ["tienda"] : [])];
   const act = (f: () => void) => () => { f(); rerender(); };
   const [invType, setInvType] = useState<'todas' | 'cuerpo' | 'distancia' | 'otro'>('todas');
   const [invState, setInvState] = useState<'todas' | 'disponibles' | 'bloqueadas'>('todas');
@@ -873,6 +874,7 @@ function Menu({ g, rerender, touch, pad }: { g: Game; rerender: () => void; touc
         {(pad) && <div className="pause-controls font-pixel">{PAD_LEGEND.map(l => <span key={l}>{l}</span>)}</div>}
         {!touch && <div className="pause-controls font-pixel"><span>WASD · mover</span><span>Ratón · mirar / clic · ataque básico</span><span>Der · cargar / apuntar · quieto 1s: crítico</span><span>P · parry · H · bloquear</span><span>Espacio · saltar (aguante)</span><span>Shift mantener · correr · tocar · dash</span><span>Alt · dash · C · barrida</span><span>E · interactuar · Q · arma</span><span>F · remate · G · escudo</span><span>Clic rueda o V · patada</span><span>T · recarga · U · pacto · B · habilidad de clase</span><span>X · bomba · Z · nova · N · sigilo</span><span>1–4 · consumibles · 5 · espejo · Esc · pausa / salir de pantalla completa</span><span>F11 · pantalla completa</span></div>}
         {g.menuTab === "mapa" && <MapView g={g} />}
+        {g.menuTab === "estratega" && <LiveStrategist g={g} />}
         {g.menuTab === "mando" && <PadTester />}
         {g.menuTab === 'crónicas' && <ChroniclesPanel g={g} initial="expedición" />}
         {g.menuTab === "pactos" && <PactPanel g={g} rerender={rerender} />}
