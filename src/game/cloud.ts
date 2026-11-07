@@ -8,6 +8,7 @@ import { collectSave, applySave, shouldPull, CLOUD_STAMP_KEY, type GlobalRun } f
 import { readArchive } from "./chronicles";
 import { readPlayer, savePlayerName, RUN_SAVE_KEY, type RunRecord } from "./run-save";
 import type { Game } from "./engine";
+import { PARIAH_KEY } from "./pariah";
 import { STATS_KEY, readStats, mergeStats, parseStats } from "./statistics";
 
 let currentUser: User | null = null;
@@ -53,8 +54,11 @@ async function pullSave(u: User) {
   const { data } = await supabase.from("cloud_saves").select("data, saved_at").eq("user_id", u.id).maybeSingle();
   try { beforeSync(); } catch { /* opcional */ }
   const localRun = localStorage.getItem(RUN_SAVE_KEY);
+  const localPariah = localStorage.getItem(PARIAH_KEY);
   if (data && shouldPull(stamp(), Number(data.saved_at))) {
     applySave(localStorage, data.data);
+    // El desbloqueo de P.A.R.I.A.H nunca se pierde por una copia más vieja.
+    if (localPariah === "6") localStorage.setItem(PARIAH_KEY, "6");
     // Cambio de cuenta: si la cuenta nueva no tiene run en curso, la partida actual (vida, inventario, piso, ubicación) pasa con ella.
     const remote = data.data as Record<string, unknown> | null;
     if (localRun && !(remote && typeof remote[RUN_SAVE_KEY] === "string")) localStorage.setItem(RUN_SAVE_KEY, localRun);
@@ -80,6 +84,7 @@ function start() {
     if (event === "SIGNED_IN" && currentUser && prev !== currentUser.id) void pullSave(currentUser);
   });
   window.setInterval(() => void pushSave(), 45000);
+  window.addEventListener("ars-anima-unlock", () => void pushSave());
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") void pushSave(); });
 }
 

@@ -55,7 +55,11 @@ export function pariahStep(state: number, action: PariahAction): number {
   return action === "bench" ? 1 : 0;
 }
 export function readPariahState(): number { try { const n = Number(localStorage.getItem(PARIAH_KEY) ?? 0); return Number.isFinite(n) ? Math.max(0, Math.min(6, Math.floor(n))) : 0; } catch { return 0; } }
-export function writePariahState(n: number) { try { localStorage.setItem(PARIAH_KEY, String(n)); } catch { /* sin almacenamiento */ } }
+export function writePariahState(n: number) {
+  try { if (readPariahState() >= 6 && n < 6) return; localStorage.setItem(PARIAH_KEY, String(n)); } catch { /* sin almacenamiento */ }
+  // Desbloqueo permanente: avisa al guardado en la nube para subirlo a la cuenta al instante.
+  if (n >= 6) try { window.dispatchEvent(new Event("ars-anima-unlock")); } catch { /* sin ventana */ }
+}
 export const pariahUnlocked = () => readPariahState() >= 6;
 /** Registra una acción; devuelve true sólo en el instante del desbloqueo. */
 export function notePariahAction(action: PariahAction) {
