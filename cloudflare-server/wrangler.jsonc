@@ -18,6 +18,7 @@
   ],
   "vars": {
     "ALLOW_GUESTS": "1",
+    "APP_URL": "https://pariah-unbound-arena.lovable.app",
     "SUPABASE_URL": "https://bzjxhczkecjmalpfxecp.supabase.co",
     "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_0CS-v8yneNR3cTi0McoVzQ_HIrdYZY8"
   }
