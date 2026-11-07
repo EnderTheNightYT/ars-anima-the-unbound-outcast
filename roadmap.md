@@ -205,3 +205,10 @@
 - [ ] Resultados de salas al proyecto nuevo (ranking).
 - [ ] Lobby/botín/wiki/IA con servidor publicado (revisar).
 - [ ] Sprite único de puño de P.A.R.I.A.H (papel escrito, caracteres borrosos).
+
+## P.A.R.I.A.H y servidor
+- [x] Hitbox ajustada a la silueta (jugador y PvP).
+- [x] Clase secreta P.A.R.I.A.H: secuencia oculta, código de prueba, pasivas, Ruptura, Ruinas, Impulso, Vacío, Anatomía, progresión.
+- [x] Servidor de salas publicado verificado con 4 clientes.
+- [ ] Publicar el servidor actualizado en Cloudflare — espera el token de Cloudflare del usuario.
+- [ ] Mover el ranking del juego viejo — su base de datos está en otra cuenta, sin acceso.
