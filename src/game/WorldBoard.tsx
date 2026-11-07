@@ -161,7 +161,7 @@ export function WorldBoard() {
 
 const MODE_NAME: Record<string, string> = { coop: "Cooperativa", traicion: "Traicionera", caos: "Caótica" };
 /** Ranking y tus últimas partidas online; los datos los escribe solo el servidor de salas al terminar cada partida. */
-function MpBoard({ me }: { me: string | undefined }) {
+export function MpBoard({ me }: { me: string | undefined }) {
   const [rows, setRows] = useState<Awaited<ReturnType<typeof loadMpProfiles>> | null>(null);
   const [hist, setHist] = useState<Awaited<ReturnType<typeof loadMpHistory>>>([]);
   const [err, setErr] = useState("");

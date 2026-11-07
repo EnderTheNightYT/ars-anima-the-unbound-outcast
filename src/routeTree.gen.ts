@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RankingsRouteImport } from './routes/rankings'
 import { Route as ApiPublicMpResultRouteImport } from './routes/api/public/mp/result'
 import { Route as ApiPublicMpVaultClaimRouteImport } from './routes/api/public/mp/vault-claim'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RankingsRoute = RankingsRouteImport.update({
+  id: '/rankings',
+  path: '/rankings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicMpResultRoute = ApiPublicMpResultRouteImport.update({
@@ -31,30 +37,40 @@ const ApiPublicMpVaultClaimRoute = ApiPublicMpVaultClaimRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/rankings': typeof RankingsRoute
   '/api/public/mp/result': typeof ApiPublicMpResultRoute
   '/api/public/mp/vault-claim': typeof ApiPublicMpVaultClaimRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/rankings': typeof RankingsRoute
   '/api/public/mp/result': typeof ApiPublicMpResultRoute
   '/api/public/mp/vault-claim': typeof ApiPublicMpVaultClaimRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/rankings': typeof RankingsRoute
   '/api/public/mp/result': typeof ApiPublicMpResultRoute
   '/api/public/mp/vault-claim': typeof ApiPublicMpVaultClaimRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/public/mp/result' | '/api/public/mp/vault-claim'
+  fullPaths:
+    '/' | '/rankings' | '/api/public/mp/result' | '/api/public/mp/vault-claim'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/public/mp/result' | '/api/public/mp/vault-claim'
-  id: '__root__' | '/' | '/api/public/mp/result' | '/api/public/mp/vault-claim'
+  to: '/' | '/rankings' | '/api/public/mp/result' | '/api/public/mp/vault-claim'
+  id:
+    | '__root__'
+    | '/'
+    | '/rankings'
+    | '/api/public/mp/result'
+    | '/api/public/mp/vault-claim'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  RankingsRoute: typeof RankingsRoute
   ApiPublicMpResultRoute: typeof ApiPublicMpResultRoute
   ApiPublicMpVaultClaimRoute: typeof ApiPublicMpVaultClaimRoute
 }
@@ -66,6 +82,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rankings': {
+      id: '/rankings'
+      path: '/rankings'
+      fullPath: '/rankings'
+      preLoaderRoute: typeof RankingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/mp/result': {
@@ -87,6 +110,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  RankingsRoute: RankingsRoute,
   ApiPublicMpResultRoute: ApiPublicMpResultRoute,
   ApiPublicMpVaultClaimRoute: ApiPublicMpVaultClaimRoute,
 }
