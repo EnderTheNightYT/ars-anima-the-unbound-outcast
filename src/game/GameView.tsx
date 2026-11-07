@@ -1,5 +1,7 @@
 // @ts-nocheck
 import { LEGIBILITY } from "./sprite-legibility";
+import { drawPortalMarker, portalPalette } from './portal-marker';
+import { drawPickup } from './pickup-animation';
 import { BeatCue } from "./BeatCue";
 import bellMusic from "@/assets/the-bell-that-never-rings-floor-one.mp3.asset.json";
 import { useEffect, useRef, useState } from "react";
@@ -139,7 +141,7 @@ export default function GameView() {
     ctx.imageSmoothingEnabled = false;
     let spriteWorld: SpriteWorld | null = null;
     try { spriteWorld = new SpriteWorld(); } catch (e) { console.warn('Vista 3D no disponible; se mantiene la perspectiva original.', e); }
-    const renderWorld = () => { const alt=!!spriteWorld&&!spriteWorld.lost&&g.camera.mode!=='fp'&&g.mode!=='title'; if(canvas.current){canvas.current.style.objectFit=alt?'fill':'cover';canvas.current.dataset.camera=g.camera.mode;} if (alt) spriteWorld.frame(g, ctx); else {g.worldReticle=null;g.render(ctx);} if (canvas.current && g.mode === 'play') canvas.current.dataset.sceneReady = 'true'; };
+    const renderWorld = () => { const alt=!!spriteWorld&&!spriteWorld.lost&&g.camera.mode!=='fp'&&g.mode!=='title'; if(canvas.current){canvas.current.style.objectFit=alt?'fill':'cover';canvas.current.dataset.camera=g.camera.mode;} if (alt) { spriteWorld.frame(g, ctx); drawPickup(g, ctx, W, H); } else {g.worldReticle=null;g.render(ctx);} if (canvas.current && g.mode === 'play') canvas.current.dataset.sceneReady = 'true'; };
     let zoneStreamer: ZoneStreamer | null = null; let cleanupBoot = () => {};
     const hybrid = gpuHost.current ? new HybridRenderer(gpuHost.current, matchMedia("(pointer: coarse)").matches) : null; gfxRef = hybrid;
     const occ = new Uint8Array(MAP_SIZE * MAP_SIZE * 2);
@@ -316,14 +318,20 @@ export default function GameView() {
       const radius = Math.ceil(R / s) + 2;
       for (let y = Math.max(0, Math.floor(g.py)-radius); y < Math.min(MAP_SIZE, g.py+radius); y++) for (let x = Math.max(0, Math.floor(g.px)-radius); x < Math.min(MAP_SIZE, g.px+radius); x++) { const v = g.map[y * MAP_SIZE + x]; if (v === 0) { c.fillStyle = "rgba(120,60,70,0.55)"; c.fillRect(x * s, y * s, s + .3, s + .3); } else if (v === 3) { c.fillStyle = "#c9a14a"; c.fillRect(x * s, y * s, s, s); } else if (v === 11) { c.fillStyle = "#ff9a3a"; c.fillRect(x * s, y * s, s, s); } }
       const col: Record<string, string> = { shop: "#ffd34a", chest: "#d79a4a", altar: "#c35bff", portal: g.collapse ? "#ffffff" : "#7ad8ff", key: "#63e08a", lore: "#e8d6b8", note: "#f2e4cc", cipherlock: "#ffb347", mapfrag: "#ffd34a", palimpsest: "#7ad8ff", folio: "#9ad8ff" };
-      for (const p of g.pickups) if (!p.used && col[p.kind]) { c.fillStyle = col[p.kind]; c.beginPath(); c.arc(p.x * s, p.y * s, 2.6, 0, 7); c.fill(); }
+      for (const p of g.pickups) if (!p.used && p.kind !== 'portal' && col[p.kind]) { c.fillStyle = col[p.kind]; c.beginPath(); c.arc(p.x * s, p.y * s, 2.6, 0, 7); c.fill(); }
       if (g.lairHint) { c.strokeStyle = "rgba(255,211,74,.85)"; c.lineWidth = 2; c.setLineDash([4, 3]); c.beginPath(); c.arc(g.lairHint.x * s, g.lairHint.y * s, g.lairHint.r * s, 0, 7); c.stroke(); c.setLineDash([]); }
-      if (g.collapse?.portal) { const px = g.collapse.portal.x * s, py = g.collapse.portal.y * s, k = 4 + Math.sin(performance.now() / 150) * 2; c.fillStyle = "#ffffff"; c.strokeStyle = "#ff3355"; c.lineWidth = 2; c.beginPath(); c.arc(px, py, k + 2, 0, 7); c.fill(); c.stroke(); }
       for (const h of g.hazards) { c.fillStyle = "rgba(255,60,40,.8)"; c.beginPath(); c.arc(h.x * s, h.y * s, 2.4, 0, 7); c.fill(); }
       for (const e of g.enemies) { if(e.dead || e.ambush)continue; c.fillStyle = e.kind === "librero" ? "#ff2a2a" : e.elite ? "#ff8a3a" : "#ff3355"; c.fillRect(e.x * s - 2, e.y * s - 2, e.kind === "librero" ? 6 : 3, e.kind === "librero" ? 6 : 3); }
       c.restore();
       c.fillStyle = "#7ad8ff"; c.beginPath(); c.moveTo(R, R - 6); c.lineTo(R - 4, R + 4); c.lineTo(R + 4, R + 4); c.fill();
       c.strokeStyle = "#8a5a3a"; c.lineWidth = 3; c.beginPath(); c.arc(R, R, R - 2, 0, Math.PI * 2); c.stroke();
+      const palette = portalPalette(), a = -g.ang - Math.PI / 2;
+      for (const p of g.pickups) if (!p.used && p.kind === 'portal') {
+        const dx = (p.x - g.px) * s, dy = (p.y - g.py) * s;
+        const sx = dx * Math.cos(a) - dy * Math.sin(a), sy = dx * Math.sin(a) + dy * Math.cos(a);
+        const distance = Math.hypot(sx, sy), clamp = Math.min(1, (R - 18) / Math.max(1, distance));
+        drawPortalMarker(c, R + sx * clamp, R + sy * clamp, 9, palette, 1 + Math.sin(g.time * 4));
+      }
       c.fillStyle = "#e8d6b8"; c.font = "10px monospace"; c.textAlign = "center";
       const na = -g.ang - Math.PI / 2; c.fillText("N", R + Math.cos(na - Math.PI / 2) * (R - 9), R + Math.sin(na - Math.PI / 2) * (R - 9) + 3);
     };
@@ -646,10 +654,17 @@ function MapView({ g }: { g: Game }) {
       c.fillStyle = d.open ? "#3fae6a" : d.blocked ? "#ff2a3a" : "#c9822a"; c.fillRect(d.x * S + 1, d.y * S + 1, S - 2, S - 2);
       if (d.blocked) { c.fillStyle = "#fff"; c.font = "bold 8px monospace"; c.textAlign = "center"; c.fillText("×", d.x * S + 5, d.y * S + 8); } }
     const pc: Record<string, string> = { shop: "#ffd34a", chest: "#d79a4a", altar: "#c35bff", portal: "#7ad8ff", key: "#63e08a", lore: "#e8d6b8", item: "#5aa7ff", note:'#e8d6b8', mapfrag:'#7ad8ff', cipherlock:'#d79a4a', palimpsest:'#c35bff', folio:'#e8d6b8', pactstone:'#c35bff', sanctuary:'#63e08a', trap:'#ff3355' };
-    for (const p of g.pickups) if (!p.used && pc[p.kind]) { c.fillStyle = pc[p.kind]; c.beginPath(); c.arc(p.x * S, p.y * S, p.kind === "item" ? 3 : 4, 0, 7); c.fill(); }
+    for (const p of g.pickups) if (!p.used && p.kind !== 'portal' && pc[p.kind]) { c.fillStyle = pc[p.kind]; c.beginPath(); c.arc(p.x * S, p.y * S, p.kind === "item" ? 3 : 4, 0, 7); c.fill(); }
     for (const e of g.enemies) if (!e.dead && !e.ambush) { c.fillStyle = e.kind === "librero" ? "#ff2a2a" : e.miniBoss ? "#ff8a2a" : e.aware ? "#ff3355" : "#a06070"; c.fillRect(e.x * S - 3, e.y * S - 3, 6, 6); if (e.tyrant) { c.strokeStyle = "#ffd34a"; c.lineWidth = 2; c.strokeRect(e.x * S - 5, e.y * S - 5, 10, 10); } }
     c.font = "bold 11px monospace"; c.textAlign = "center";
     const labels: MapLabel[] = [];
+    const palette = portalPalette();
+    for (const p of g.pickups) if (!p.used && p.kind === 'portal') {
+      drawPortalMarker(c, p.x * S, p.y * S, 12, palette);
+      labels.push({ x: p.x * S - 17, y: p.y * S - 17, w: 34, h: 34 });
+      const label = placeMapLabel(p.x * S, p.y * S + 23, 60, MAP_SIZE * S, labels);
+      if (label) { c.fillStyle = palette.ink; c.fillRect(label.x, label.y, label.w, label.h); c.fillStyle = palette.rim; c.fillText('PORTAL', label.x + label.w / 2, label.y + 11); }
+    }
     for (const z of intel) { const name=uiText(z.name,lang); const r = placeMapLabel((z.x + z.w / 2) * S, (z.y + z.h / 2) * S, c.measureText(name).width + 8, MAP_SIZE * S, labels); if (!r) continue; c.fillStyle = "#000a"; c.fillRect(r.x, r.y, r.w, r.h); c.fillStyle = z.accessible ? "#e8d6b8" : "#ff7a8a"; c.fillText(name, r.x + r.w / 2, r.y + 11, r.w - 8); }
     c.fillStyle = "#7ad8ff"; c.beginPath(); c.arc(g.px * S, g.py * S, 5, 0, 7); c.fill();
     c.strokeStyle = "#7ad8ff"; c.lineWidth = 2; c.beginPath(); c.moveTo(g.px * S, g.py * S); c.lineTo((g.px + Math.cos(g.ang) * 2) * S, (g.py + Math.sin(g.ang) * 2) * S); c.stroke();

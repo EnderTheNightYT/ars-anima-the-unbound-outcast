@@ -1,4 +1,6 @@
 # Roadmap
+- [ ] Portal grande y colorido en minimapa y mapa completo; animación de recogida para todas las clases.
+- [ ] Reproducir y corregir el portal al siguiente nivel que no aparece.
 - [x] Importado otra vez a este proyecto: nube nueva, tablas, Google, canción del piso 1 y hoja del personaje reconstruida.
 - [x] Cámara externa más lejos y más alta (lejanía por defecto 5, hasta 9).
 - [x] Tope de enemigos vivos por nivel y alrededor del jugador; menos enemigos por sala.

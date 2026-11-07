@@ -67,6 +67,9 @@
 }
 
 :root {
+  --map-portal-core: oklch(0.88 0.15 185);
+  --map-portal-rim: oklch(0.9 0.17 90);
+  --map-portal-ink: oklch(0.14 0.025 310);
   --radius: 0.25rem;
   --background: oklch(0.12 0.03 330);
   --foreground: oklch(0.9 0.02 330);

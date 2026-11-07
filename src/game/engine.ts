@@ -67,6 +67,7 @@ import { ROLES, ROLE_LABEL, rollEnemyRole, cloudPattern, type EnemyRole } from "
 import { makeDmgNum, stepDmgNums, dmgNumLook, DMG_NUM, type DmgNum } from "./dmg-numbers";
 import { sweptProjectileHits, meleeReachesBody } from "./hitbox";
 import * as PX from "./pariah-runtime";
+import { newPickupAnimation, PICKUP_DURATION, drawPickup } from "./pickup-animation";
 import { isPariah, PARIAH_WEAPONS, pariahXp, growthAttrs, PARIAH } from "./pariah";
 import { BODY_RADIUS, BODY_HEIGHT, cellVolume, playerHitbox, projectileHitsPlayer, LOW_PROFILE, JUMP, clampCeiling, combatXpMultiplier, sealSatisfied, type DoorSeal, propBreakOutcome, SPLINTER, levelBonus, POWDER_KEG, kegDamage, EXPOSE, propMaterial, SQUAD, shieldBlocks, squadDamageFactor, packSpeed, drumRoll, backstab, inkFactor } from "./world-rules";
 
@@ -1104,6 +1105,7 @@ export class Game {
     this.armor = { uid: UID++, kind: "armor", name: "Chaqueta acolchada", rarity: 0, def: 2 };
     this.food = 100; this.thirst = 100; this.ammo = 60 + (cls.id === "tecnomante" ? 12 : 0); this.bombs = cls.id === "ingeniero" ? 3 : 1; this.keys = 0; this.wounds = {}; this.burn = this.poison = this.bleed = 0;
     this.anima = Number(localStorage.getItem("ars_anima_meta") || 0);
+    this.pickupAnimation = newPickupAnimation();
     this.pariah = PX.newPariahRun(); if (isPariah(cls.id)) { this.armor = null; this.xpNext = pariahXp(this.xpNext); this.ranged.mag = 0; }
     this.recalc(); this.hp = this.hpMax; this.stam = this.stamMax; this.mh = this.mhMax; this.lumbre = this.lumbreMax;
     this.melee.mag = this.melee.magMax = 0;
@@ -2240,6 +2242,7 @@ export class Game {
     this.updateProjs(dt);
     this.updateWorld(dt);
     this.updateSurvival(dt);
+    this.pickupAnimation.t = Math.max(0, this.pickupAnimation.t - dt);
     if (isPariah(this.cls.id)) PX.update(this, dt, inp, grounded);
     // partículas
     for (const h of this.hitDirs) h.t -= dt; this.hitDirs = this.hitDirs.filter(h => h.t > 0);
@@ -2260,6 +2263,7 @@ export class Game {
   pounding = false; muzzle = 0; lastWeapon: Item | null = null;
   /** Estado de P.A.R.I.A.H en la partida activa (sólo se usa con esa clase). */
   pariah: PX.PariahRun = PX.newPariahRun();
+  pickupAnimation = newPickupAnimation();
 
   /** Cámaras pequeñas cerradas con llave o combinación; la llave o la nota quedan en la sala más alejada. */
   placeVaults(rooms: { x: number; y: number; w: number; h: number }[]) {
@@ -2907,9 +2911,9 @@ export class Game {
       const dist = Math.hypot(p.x - this.px, p.y - this.py);
       if (p.kind === "trap" && p.armed && dist < 0.5 && this.pz < 0.2) { p.armed = false; p.used = true; this.hurtPlayer(10 + this.floor * 2, "trampa"); this.msg("¡Trampa de púas! (salta sobre las marcas rojas o desármalas con E)"); this.wounds.PIERNA = 20; }
       if (Math.abs(this.pz-this.floorHeight(p.x,p.y))<.8 && dist < 0.7 && ["item", "mat", "gold", "food", "water", "ammo", "key"].includes(p.kind)) {
-        PX.grabFx(this, p.kind === "item" ? "relic" : p.kind);
         const weight = p.kind === 'item' && p.item ? itemWeight(p.item) : p.kind === 'mat' ? (p.n ?? 1) * (this.has('recolector') ? 2 : 1) * .25 : p.kind === 'food' ? 1 : p.kind === 'water' ? 1.5 : p.kind === 'ammo' ? .5 : p.kind === 'key' ? .2 : 0;
         if (!this.canCarry(weight)) { this.interactionPrompt = `Mochila llena · ${CARRY_LIMIT} de capacidad`; continue; }
+        this.pickupAnimation = { t: PICKUP_DURATION, sprite: p.kind === "item" ? "relic" : p.kind };
         this.onSound("pickup"); p.used = true; this.track("items", 1, p.item?.name ?? p.kind); if (["mat","gold","ammo"].includes(p.kind)) this.track("resources", p.n ?? (p.kind === "ammo" ? 10 : 1), p.mat ?? p.kind); if (p.kind === "gold") this.score.gain("gold", 1 + Math.floor((p.n ?? 5) / 10)); else this.score.gain("pickup");
         if (p.kind === "item" && p.item) { if (p.item.kind === 'consumable') { const id = p.item.id ?? p.item.name; this.cons[id] = (this.cons[id] ?? 0) + (p.item.qty ?? 1); } else { this.bag.push(p.item); if (p.item.kind === 'weapon') { this.foundWeapon(p.item); this.onSound(p.item.rarity >= 3 ? "lootEpic" : p.item.rarity >= 1 ? "lootRare" : "loot"); } } this.float(`${p.item.name}`, ["#c9c3d6", "#5aa7ff", "#ffd34a", "#c35bff", "#ff6a2a"][p.item.rarity]); }
         if (p.kind === "mat") { this.onSound("resource", p.mat); this.questEvent("collect"); const n = (p.n ?? 1) * (this.has("recolector") ? 2 : 1); this.mats[p.mat!] = (this.mats[p.mat!] ?? 0) + n; this.float(`+${n} ${MATERIALS[p.mat!]}`, "#9f9"); }
@@ -3528,6 +3532,7 @@ export class Game {
   }
 
   drawWeapon(ctx: CanvasRenderingContext2D) {
+    if (drawPickup(this, ctx, W, H)) return;
     if (isPariah(this.cls?.id) && PX.drawFists(this, ctx, W, H)) return;
     const w = this.slot === 0 ? this.melee : this.ranged;
     if (!w?.base) return;
