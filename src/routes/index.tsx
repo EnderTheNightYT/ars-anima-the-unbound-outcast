@@ -1,23 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
+import GameView from "@/game/GameView";
 
-// The home route ships no og:image, so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
-});
+  ssr: false,
+  head: () => ({
+    meta: [
+      { title: "Ars. Anima. : - \" IL'INCONNU. \" — FPS retro jugable" },
+      { name: "description", content: "ARS ANIMA: \"IL'INCONNU\" — FPS retro soulslike roguelite con parkour, remates, pactos y supervivencia. Juega en PC y celular." },
+      { property: "og:title", content: "ARS ANIMA: \"IL'INCONNU\" — Demo jugable" },
+      { property: "og:description", content: "ARS ANIMA: \"IL'INCONNU\" — FPS retro roguelite con parkour, remates y botín aleatorio." },
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: GameView,
+});

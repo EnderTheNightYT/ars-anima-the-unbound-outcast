@@ -1,0 +1,39 @@
+import { describe, it, expect } from 'vitest';
+import { ChronicleKeeper, readArchive, leaderboard, INITIAL_TITLE, scoreBreakdown, emptyStats, type Outcome } from './chronicles';
+import { Game } from './engine';
+import { CLASSES } from './data';
+const memory = () => { const m = new Map<string,string>(); return {getItem:(k:string)=>m.get(k)??null,setItem:(k:string,v:string)=>{m.set(k,v);}}; };
+function setup() { const store=memory(), k=new ChronicleKeeper(store); k.start('real-player','  ÁNA / 星 🕯  ','duelista','Duelista','normal','run'); return {store,k}; }
+describe('identity archive',()=>{
+  it('preserves exact name and starts every expedition as IL INCONNU',()=>{const {k}=setup();expect(k.run?.identity.name).toBe('  ÁNA / 星 🕯  ');expect(k.run?.identity.title).toBe(INITIAL_TITLE);});
+  it('counts a semantic action only once by event id',()=>{const {k}=setup();k.event('kills',1,'sombra',{},'enemy-1');k.event('kills',1,'sombra',{},'enemy-1');expect(k.run?.stats.kills).toBe(1);});
+  it('records genuine quantity, class, name and title in recognitions',()=>{const {k}=setup();for(let n=0;n<5;n++)k.event('rests',1,'sentarse en una banca');const deed=k.run?.deeds.at(-1);expect(deed?.count).toBe(5);expect(deed?.text).toContain('  ÁNA / 星 🕯  , de la senda Duelista, bajo el título IL\'INCONNU');});
+  it('critical escape requires strictly less than five percent health',()=>{const {k,store}=setup();k.finish('transition',1,60,'',{collapse:true,healthShare:.05,remaining:2});expect(readArchive(store).characters[0]?.titles.some(t=>t.id==='nemo')).toBe(false);k.nextFloor(2);k.finish('transition',2,90,'',{collapse:true,healthShare:.049,remaining:2});expect(readArchive(store).characters[0]?.titles.some(t=>t.id==='nemo')).toBe(true);});
+  it('last second requires a real collapse and positive remaining time <=1',()=>{const {k,store}=setup();k.finish('transition',1,60,'',{collapse:true,healthShare:.5,remaining:0});expect(readArchive(store).characters[0]?.titles.some(t=>t.id==='last')).toBe(false);k.nextFloor(2);k.finish('transition',2,90,'',{collapse:true,healthShare:.5,remaining:1});expect(readArchive(store).characters[0]?.titles.some(t=>t.id==='last')).toBe(true);});
+  it('titles do not unlock from kills alone or from class selection',()=>{const {k,store}=setup();k.event('kills',999);expect(readArchive(store).characters[0]?.titles.map(t=>t.id)).toEqual(['unknown']);expect(k.equip('nemo')).toBe(false);});
+  it('requires an unhinted memory solve for forgotten title',()=>{const {k,store}=setup();k.event('puzzles',1,'folio',{noHints:false,memory:true});expect(readArchive(store).characters[0]?.titles.some(t=>t.id==='forgotten')).toBe(false);k.event('puzzles',1,'otro folio',{noHints:true,memory:true});expect(readArchive(store).characters[0]?.titles.some(t=>t.id==='forgotten')).toBe(true);});
+  it('historical title remains unchanged after another expedition equips a title',()=>{const {k,store}=setup();k.event('puzzles',1,'folio',{noHints:true,memory:true});expect(k.equip('forgotten')).toBe(true);k.finish('death',2,120,'veneno');k.start('real-player','  ÁNA / 星 🕯  ','duelista','Duelista','normal','run-2');expect(k.run?.identity.title).toBe(INITIAL_TITLE);expect(k.equip('unknown')).toBe(true);expect(readArchive(store).expeditions.find(r=>r.id==='run')?.identity.title).toBe("L'OUBLIÉ");});
+  it.each(['won','death','collapse','abandoned'] as Outcome[])('persists %s before results are dismissed',outcome=>{const {k,store}=setup();k.event('kills',2);k.finish(outcome,3,131,'escombros');const saved=readArchive(store).expeditions[0];expect(saved?.outcome).toBe(outcome);expect(saved?.stats.seconds).toBe(131);expect(saved?.resultText).toContain('Duelista');expect(saved?.resultText).toContain(INITIAL_TITLE);expect(saved?.endedAt).toBeGreaterThan(0);k.finish(outcome,3,131);expect(readArchive(store).expeditions).toHaveLength(1);});
+  it('transition keeps the run active and cannot double count an extraction',()=>{const {k}=setup();k.finish('transition',1,40);k.finish('transition',1,40);expect(k.run?.stats.completed).toBe(1);expect(k.run?.outcome).toBe('active');expect(k.run?.resultText).toContain('Su camino continúa');k.nextFloor(2);expect(k.run?.floor).toBe(2);});
+  it('local leaderboard contains only real participating identities',()=>{const store=memory();expect(leaderboard(readArchive(store))).toEqual([]);const k=new ChronicleKeeper(store);k.start('p','Nombre','c','Clase','normal');k.event('bosses',1);expect(leaderboard(readArchive(store))).toHaveLength(1);expect(leaderboard(readArchive(store))[0]?.bosses).toBe(1);});
+  it('archive restores after reopening the keeper',()=>{const {k,store}=setup();k.event('pacts',2);k.syncTime(50);const reopened=new ChronicleKeeper(store);expect(reopened.restore('run')?.stats.pacts).toBe(2);expect(reopened.run?.stats.seconds).toBe(50);});
+  it('score is transparent, deterministic, diversified and non-negative',()=>{const s=emptyStats();s.bosses=1;s.secrets=1;s.puzzles=1;s.kills=2;expect(scoreBreakdown(s,2,'normal','death').total).toBe(686);expect(scoreBreakdown(s,2,'dificil','death').total).toBe(858);expect(scoreBreakdown(emptyStats(),1,'normal','death').total).toBe(0);});
+  it('strategy title requires melee hits and no shots at the boss',()=>{const {k,store}=setup();k.event('hits',1,'espada',{ranged:false});k.event('shots');k.event('bosses');expect(readArchive(store).characters[0]?.titles.some(t=>t.id==='unknown-blade')).toBe(false);k.nextFloor(2);k.event('hits',1,'espada',{ranged:false});k.event('bosses');expect(readArchive(store).characters[0]?.titles.some(t=>t.id==='unknown-blade')).toBe(true);});
+  it('movement title requires aerial and dash attacks without intervening damage',()=>{const {k,store}=setup();k.event('hits',1,'aéreo',{aerial:true});k.event('damageTaken',1);k.event('hits',1,'dash',{dash:true});expect(readArchive(store).characters[0]?.titles.some(t=>t.id==='unknown-motion')).toBe(false);k.event('hits',1,'aéreo',{aerial:true});expect(readArchive(store).characters[0]?.titles.some(t=>t.id==='unknown-motion')).toBe(true);});
+  it('counterattack title requires the actual killing riposte',()=>{const {k,store}=setup();k.event('counters');k.event('kills');expect(readArchive(store).characters[0]?.titles.some(t=>t.id==='unknown-riposte')).toBe(false);k.event('kills',1,'riposte',{riposte:true});expect(readArchive(store).characters[0]?.titles.some(t=>t.id==='unknown-riposte')).toBe(true);});
+});
+describe('simulation hooks',()=>{
+  it('registers actual kills, pacts and consumption without changing balance',()=>{localStorage.clear();const g=new Game();g.runName='Prueba';const cls=CLASSES.find(c=>c.id==='duelista');if(!cls)throw new Error('Missing class');g.start(cls);const e=g.enemies.find(e=>!e.dead);if(!e)throw new Error('Missing enemy');g.killEnemy(e);g.killEnemy(e);expect(g.chronicles.run?.stats.kills).toBe(1);g.use('racion');g.use('agua');expect(g.chronicles.run?.stats.food).toBe(1);expect(g.chronicles.run?.stats.drinks).toBe(1);g.offerPact();g.choose(0);expect(g.chronicles.run?.stats.pacts).toBe(1);g.saveRun();expect(readArchive().expeditions[0]?.stats.pacts).toBe(1);});
+});
+describe('chronicle memory bounds', () => {
+  it('keeps at most LIVE_EVENTS in memory and STORED_EVENTS on disk after thousands of hits', async () => {
+    const { ChronicleKeeper, LIVE_EVENTS, STORED_EVENTS, readArchive } = await import('./chronicles');
+    const mem = new Map<string, string>(); const store = { getItem: (k: string) => mem.get(k) ?? null, setItem: (k: string, v: string) => void mem.set(k, v) };
+    const k = new ChronicleKeeper(store); k.start('p', 'Marcos', 'duelista', 'Duelista', 'normal', 'run-x');
+    for (let i = 0; i < 5000; i++) k.event('hits', 1, '', {}, `h${i}`);
+    k.persist();
+    expect(k.run!.events.length).toBeLessThanOrEqual(LIVE_EVENTS);
+    expect(k.run!.stats.hits).toBe(5000);
+    expect(readArchive(store).expeditions[0]!.events.length).toBeLessThanOrEqual(STORED_EVENTS);
+  });
+});

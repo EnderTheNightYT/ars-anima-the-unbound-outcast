@@ -10,33 +10,53 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiPublicMpResultRouteImport } from './routes/api/public/mp/result'
+import { Route as ApiPublicMpVaultClaimRouteImport } from './routes/api/public/mp/vault-claim'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicMpResultRoute = ApiPublicMpResultRouteImport.update({
+  id: '/api/public/mp/result',
+  path: '/api/public/mp/result',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicMpVaultClaimRoute = ApiPublicMpVaultClaimRouteImport.update({
+  id: '/api/public/mp/vault-claim',
+  path: '/api/public/mp/vault-claim',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/public/mp/result': typeof ApiPublicMpResultRoute
+  '/api/public/mp/vault-claim': typeof ApiPublicMpVaultClaimRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/public/mp/result': typeof ApiPublicMpResultRoute
+  '/api/public/mp/vault-claim': typeof ApiPublicMpVaultClaimRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/public/mp/result': typeof ApiPublicMpResultRoute
+  '/api/public/mp/vault-claim': typeof ApiPublicMpVaultClaimRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/api/public/mp/result' | '/api/public/mp/vault-claim'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/api/public/mp/result' | '/api/public/mp/vault-claim'
+  id: '__root__' | '/' | '/api/public/mp/result' | '/api/public/mp/vault-claim'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiPublicMpResultRoute: typeof ApiPublicMpResultRoute
+  ApiPublicMpVaultClaimRoute: typeof ApiPublicMpVaultClaimRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +68,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/mp/result': {
+      id: '/api/public/mp/result'
+      path: '/api/public/mp/result'
+      fullPath: '/api/public/mp/result'
+      preLoaderRoute: typeof ApiPublicMpResultRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/mp/vault-claim': {
+      id: '/api/public/mp/vault-claim'
+      path: '/api/public/mp/vault-claim'
+      fullPath: '/api/public/mp/vault-claim'
+      preLoaderRoute: typeof ApiPublicMpVaultClaimRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiPublicMpResultRoute: ApiPublicMpResultRoute,
+  ApiPublicMpVaultClaimRoute: ApiPublicMpVaultClaimRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

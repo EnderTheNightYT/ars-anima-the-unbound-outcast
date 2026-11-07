@@ -7,24 +7,39 @@
 >
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
-
-## What Lovable manages
-
-Rules outside this block are the project's own. Change the pieces below in
-Lovable, not by hand. With the [Lovable MCP](https://mcp.lovable.dev)
-connected, `send_message` asks Lovable to do it; otherwise ask the user to
-use the editor.
-
-- **Database.** Do not add or edit `supabase/migrations/` or `drizzle/`.
-  Ask Lovable to change the schema.
-- **Generated files.** Do not edit a file whose header says it is automatically
-  generated.
-- **AI gateway.** Keep model calls on Lovable's gateway, and keep
-  `LOVABLE_API_KEY` out of browser code.
-- **Connectors.** Lovable provides native connectors. `list_connectors` shows
-  which are enabled; `add_connector` only returns the dashboard link. When a
-  connector is enabled, calls go through the connector gateway and need
-  `LOVABLE_API_KEY`. When Lovable does not provide one, users can bring their
-  own key and store it in Secrets.
-- **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Architecture
+- Personal lifetime statistics live in browser-safe statistics.ts, keyed by run and weapon instance; cloud.ts merges these records before snapshot writes and restores. Why: resumed runs and repeated pickups must not duplicate totals, and counters survive account backup.
+- Weapon damage examples use weapon-guide.ts with the live weapon and combo tables and explicit neutral-hit assumptions. Why: wiki damage stays tied to playable weapon rules without promising exact encounter outcomes.
+- Google accounts (Lovable Cloud) own cloud progress: `cloud-save.ts` holds pure sync/ranking rules, `cloud.ts` mirrors every `ars_anima_*` localStorage key to `cloud_saves` (newer stamp wins) and publishes finished runs (title, class/subclass, gear) to public `runs`. Why: the game stays local-first and playable signed-out while progress follows the account.
+- Chronicles use a local event archive with replaceable storage; AI titles decorate verified local deeds only. Why: offline history and combat balance stay independent.
+- Encounter proposals use a separate AI SDK Responses server function and validated region pools/synergy IDs; they never spawn enemies or alter equipment. Why: suggestions stay faithful to playable mechanics without modifying the run.
+- The game simulation and first-person raycaster remain in src/game/engine.ts; sprite-world.ts uses Three.js for non-first-person world geometry and the supplied sprite atlas, called by the existing GameView frame loop. Why: volumetric cameras reuse live rules, controls and assets without a second simulation.
+- Route `/` uses `ssr: false` (game touches window/canvas); dev hook `window.__game` exposes the live Game.
+- AI quest calls use a server function plus a server-only `@lovable.dev/ai-gateway` Responses helper with a strict JSON schema; validate objectives against engine events and fall back to a local procedural quest on failure. Why: keeps lore prompts and keys off the browser and the demo playable offline.
+- Weapon advisor provider-denial pause is held in server memory (no database). Why: the project runs without Lovable Cloud; enable Cloud if the pause must survive restarts.
+- Subdirectories have their own `AGENTS.md`; read it before changing files there.
+- Difficulty presets and dynamic challenge adaptation live in browser-safe `difficulty.ts` (tested in `difficulty.test.ts`); engine reads `chal` multipliers. Why: one tested place for challenge scaling.
+- Startup and zone streaming live in `asset-loader.ts`: GameView shows the boot screen until required textures are downloaded, decoded and validated; region walls stream by `zonePlan` (active + neighbours, far zones released). Why: no incomplete scene on start and fewer hitches when changing zones.
+- Light theme and RGB mode are classes on `<html>` (`theme-light`, `rgb-mode`) set by `DisplayToggles.tsx` and stored in localStorage. Why: purely presentational, no rule changes.
+- Weapon forge variants live in browser-safe `weapon-forge.ts`: makeWeapon clones the base table entry and applies at most one variant, never mutating `WEAPONS`. Why: shared tables stay stable for wiki/balance while drops get thousands of combinations.
+- Fullscreen helpers live in `fullscreen.ts`; GameView enters fullscreen on the first switch to play and re-requests pointer lock on every return to play. Why: browsers require a recent user gesture, which the start/close click provides.
+- Per-floor world averages come from the public `floor_averages()` SQL function over `runs`. Why: result cards compare against all published runs without downloading them.
+- Per-floor rankings (`floorRankings` in cloud-save.ts) and profile summary are pure and tested in rankings.test.ts; `watchRuns` subscribes to realtime inserts on `runs`. Multiplayer standings (`mpStandings`) read `mp_profiles`, written only by `mp_record_match` via the room server. Found weapons/inscriptions persist in browser-safe `armory.ts` (`ars_anima_armory_v1`, synced via cloud). Why: live boards without polling, profile works offline.
+- English UI uses `AutoTranslate` (DOM text swap from the dictionary `i18n-en.json`, rules in `auto-translate.ts`) around menus/overlays, not the live HUD. Why: hundreds of Spanish strings live inline in JSX; one dictionary translates them without rewriting every panel.
+- Chronicle persistence is throttled for frequent combat events and caps live/stored events (`STORED_EVENTS`, `LIVE_EVENTS` in chronicles.ts); totals stay in `stats`. Why: writing the full archive on every hit grew memory without bound and froze long runs.
+- `playthrough-floor1.test.ts` plays floor 1 with real inputs only (no teleports or stat edits) up to the portal and floor 2. Why: guards the full expedition loop end to end.
+- Combat dialogue is explicitly requested from statistics with recent verified events; streamed SDK calls share durable combat_ai_status denial state, and floor recaps offer an optional AI narrative. Why: avoid billed page-load fan-outs and keep refusals terminal.
+- Non-first-person cameras move the player along `Game.viewBasis` (screen forward/right written by sprite-world.ts each frame); first person keeps aim-relative movement. Why: stick/keys must match what the player sees.
+- WorldEffects sanitizes NaN/Inf before bloom. Why: one bad pixel blacked out the whole alternate-camera frame.
+- 3D view point lights never toggle visible (unused = intensity 0); the 3D view falls back to the 2D renderer on WebGL context loss. Why: changing the light count recompiles every shader, causing combat freezes on PC.
+- Starting gear uses `starterStats` (weapon-forge.ts, tested in starter-gear.test.ts): class weapon type, rarity 0, no variant/inscriptions, stats rolled from the base. Why: runs start low-level but not identical.
+- Live enemy limits live in browser-safe `enemy-cap.ts` (tested), enforced in `Game.spawn` for everything except the boss. Why: keeps screens from saturating without touching event logic.
+- Custom gamepad bindings live in browser-safe `pad-mapping.ts` (`ars_anima_padmap_v1`, tested); GameView reads `loadPadMap()`, AI proposals are validated by `validateProposal` (one action per button, Start/Select fixed). Why: no button ever does two things.
+- This project was imported from an earlier Lovable project; schema changes go through the Cloud migration tool (files in `drizzle/migrations/`) and media goes through `lovable-assets` pointers owned by this project. Why: old asset pointers and database belonged to the previous project.
+- Online multiplayer: rooms run on Cloudflare Durable Objects (`cloudflare-server/`, one `GameRoom` per room, `RoomDirectory` for the public list) executing `src/game/net/sim.ts`; the client picks `net/cf-transport.ts` when `/health` says `kind: "cf"` and keeps the Colyseus server (`multiplayer-server/`) as fallback. Clients only send inputs/whitelisted RPCs; results reach Lovable Cloud only through `/api/public/mp/*` guarded by `MP_SERVER_SECRET`. Why: free hosting with an authoritative server, without rewriting game rules. `cloudflare-server/build.mjs` stubs React and media so the Worker builds from its own folder (GitHub deploys install only its deps); `e2e/` holds 2-browser and 4-client checks. Production Worker `ars-anima-rooms` lives in the user's Cloudflare account (uploaded via the Cloudflare connector; see cloudflare-server/README.md) and is `DEFAULT_SERVER` in client.ts.
+- Post-run strategy tips live in browser-safe `strategy-tips.ts` (zod input/output, share text) with the AI call in `src/lib/strategy-tips.server.ts` (Gateway via `combatText`, shared `combat_ai_status` pause); `StrategyTips.tsx` is used by RunCard and the multiplayer results. Why: advice only reads verified stats and never changes the run.
+- In the 3D view, actor billboards (player, remotes, enemies) use an unlit `MeshBasicMaterial` pool (`figureBoards`) and the first-person composite mixes lighting into sprites at 30 %. Why: lights, shadows, occlusion and reflections blurred pixel-art figures.
+- Enemy dodge visuals come from `evadeMotion`/`evadeStyle` (combat-fx.ts, tested); engine stores `evadeMax`/`evadeStyle` when `updateEvade` fires and both renderers read `enemyEvadeOffset`. Why: the animation stays synced with the AI timer without moving hitboxes.
+- Other players' Discord handles are read only through `public_discords()` and the owner's through `my_discord()` (security definer); `profiles.discord` has no column SELECT grant. Why: hidden handles must never leave the database.
