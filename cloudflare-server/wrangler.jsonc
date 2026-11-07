@@ -1,0 +1,26 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ars-anima-rooms",
+  "main": "build/worker.js",
+  "no_bundle": true,
+  "build": { "command": "node build.mjs" },
+  "compatibility_date": "2025-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  "durable_objects": {
+    "bindings": [
+      { "name": "GAME_ROOMS", "class_name": "GameRoom" },
+      { "name": "ROOM_DIRECTORY", "class_name": "RoomDirectory" }
+    ]
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["GameRoom", "RoomDirectory"] }
+  ],
+  "vars": {
+    "ALLOW_GUESTS": "1",
+    "SUPABASE_URL": "https://c--b70204ff-919a-42d9-a9c8-6e8bd8c8f651-prod.lovable.cloud",
+    "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_kk2pDHMXim4NwFbM3va52g_pwJq_SSv",
+    "APP_URL": "https://ars-anima-questmates.lovable.app"
+  }
+  // Secreto (no va aquí): npx wrangler secret put MP_SERVER_SECRET
+}

@@ -1,0 +1,214 @@
+# Roadmap
+- [x] Importado otra vez a este proyecto: nube nueva, tablas, Google, canción del piso 1 y hoja del personaje reconstruida.
+- [x] Cámara externa más lejos y más alta (lejanía por defecto 5, hasta 9).
+- [x] Tope de enemigos vivos por nivel y alrededor del jugador; menos enemigos por sala.
+- [x] Re-importado a este proyecto: nube nueva, tablas, Google, canción del piso 1 y hoja del personaje reconstruida desde el pack de 8 direcciones.
+- [x] Sonido propio de disparo cargado por arma a distancia + zumbido de carga y aviso de carga completa.
+- [x] Apuntar más cómodo: la carga tolera ajustes pequeños de mira; menos dispersión sin apuntar.
+- [x] Sonidos de tienda: seleccionar, comprar, vender, sin fichas.
+- [x] Polvo y piedritas al golpear la cabeza contra el techo.
+- [x] Brillo en arco del área real del golpe cuerpo a cuerpo.
+- [x] Avisos en primera persona de dónde caen escombros.
+- [x] Disparo levemente asistido en celular con marca sobre el objetivo.
+- [x] Congelamiento en peleas: el bucle se recupera de errores y repara valores inválidos.
+- [ ] Probar en PC/Android reales sensación, sonido y vistas externas — requiere dispositivo del usuario.
+- [x] Proyecto importado a esta nube nueva (tablas, Google) y canción re-subida para el piso 1.
+- [x] Movimiento según la pantalla en vistas externas; vista isométrica negra corregida; techos ocultos en vistas aéreas; paredes opacas.
+- [x] Sprite del personaje re-recortado más grande + poses de deslizar, saltar y machacar.
+- [x] HUD más pequeño; estela de polvo/piedritas al correr y frenar visible en vistas 3D.
+- [ ] Revisar en partida cada vista: golpes/disparos contra enemigos, sombras y reflejos con GPU real.
+- [ ] Iniciar sesión con Google real y comprobar guardado/ranking en la nube nueva.
+- [ ] Corregir errores pendientes de mapa/diálogos sin cambiar sus solicitudes IA.
+- [ ] Cámaras alternativas: iluminación, sombras, reflejos, efectos y mira alineada con el combate; comprobar todas las vistas.
+- [ ] Rebotes de proyectiles de ambos bandos y choques en cadena de enemigos empujados, con pruebas.
+- [ ] Completar marcadores del mapa y enlaces a las fichas de la wiki.
+- [ ] Completar daño, combos, ejemplos y enlaces de armas e inscripciones.
+- [ ] Inglés integral: pantallas, HUD, identidad visible, enemigos y diálogos IA.
+- [x] MP3 adjunto conectado: 202,4 s y 250 golpes graves; reproducción y bonus/fundidos comprobados.
+- [x] Sistemas existentes revisados y 471 pruebas aprobadas; corregido volver de inglés a español.
+- [x] Cloud/Google configurados; IA de títulos, diálogos contextuales y crónicas probada en vivo. Sin límite de créditos encontrado, ningún gasto modificado.
+- [x] Estadísticas completas y récord del jefe con dificultad; recarga y reanudación del jefe/arena probadas; sonidos de golpes/escombros/nube integrados.
+- [x] Proyecto importado a este espacio: nube nueva, tablas, acceso con Google y canción del primer piso re-subida.
+- [x] Enemigos renombrados con referencias góticas a canciones, cuentos, novelas y mitos.
+- [x] Títulos por IA probados en vivo (funcionan).
+- [x] Globos de diálogo por IA reactivados con un modelo más económico (probado en vivo).
+- [x] Proyecto importado a esta nube nueva: base de datos, tabla mundial y acceso con Google reactivados.
+- [x] Canción "The Bell That Never Rings" subida de nuevo y conectada al primer piso (volumen moderado, fundido entre repeticiones, bonus al ritmo).
+- [x] Dinero llamado "fichas" en todos los textos visibles.
+- [x] Mando: vibración por evento/tipo de daño y recuadro + flecha en el botón apuntado, destello al pulsar.
+- [x] Menú de inicio en Español / English.
+- [ ] Probar pantalla completa en PC y Android reales con icono de Inicio — requiere dispositivo del usuario.
+- [ ] Verificar guardado y tabla mundial con Google real — no hay cuentas registradas; conectar Google en el juego. Títulos/diálogos/crónicas IA sí probados.
+- [x] Traducir al inglés pantallas internas del juego (mochila, wiki, mercader, menús) con el selector de idioma.
+- [x] Proyecto migrado a esta nube: base de datos, tabla mundial y acceso con Google activos.
+- [x] Dificultad en el texto compartido de resultados.
+- [x] Pistas leves hacia mapa/guarida si se tarda (guide.ts).
+- [x] E sobre enemigo aturdido = escudo humano; muere al terminar.
+- [x] Balanceo lateral suave de cámara al caminar, desenfoque leve y líneas laterales (walk-sway.ts).
+- [x] Icono Inicio entra/sale de pantalla completa en Chromium; reanudación y vista 411×744 verificadas. Orientación, vibración y sonido físico requieren PC/Android reales.
+- [x] Comparador por piso con daño medio, combos y las inscripciones del arma real.
+- [x] Wiki de armas e inscripciones enlazadas, combinaciones calculadas con reglas de combate y pruebas.
+- [x] Música del primer piso analizada y bonus de ritmo flexibles en combate y dash.
+- [x] Guardado de vida, piso, inventario y ubicación tras recarga y sincronización de cuenta.
+- [x] Mapa interactivo con enemigos, cofres, puertas y Mercader enlazados a wiki.
+- [x] Fichas de todas las armas y enlaces desde armas del juego.
+- [x] Wiki: cada arma, secuencia de combo, daño por golpe y ejemplos de enemigos.
+- [x] Estadísticas personales: partidas, derrotas, combos y hallazgos con guardado local y sincronización en la nube; 27 pruebas y lectura tras recarga verificadas.
+- [ ] Verificar guardado y restauración de estadísticas con sesión Google real: bloqueado porque aún no hay usuarios registrados; requiere que el usuario conecte Google.
+- [x] Wiki: enemigos, clases y variantes.
+- [x] Wiki: lore del mundo.
+- [x] Reportar comentarios abusivos + panel de administradores.
+- [x] Ocultar/desvincular Discord de la tabla mundial.
+- [x] Wiki: buscador de objetos (nombre, efectos, inscripciones, tipo, daño, tier, función) con comentarios.
+- [x] Wiki: mecánicas, controles y combate avanzado.
+- [x] Filtros/orden Crónica Mundial + wiki de armas con comentarios.
+- [x] Cuentas Google: progreso en la nube, tabla mundial con jugadores, formas de juego y equipamiento en el menú de inicio.
+- [x] Títulos por estrategias, movimientos y armamento usados realmente, con requisitos comprobables.
+- [x] Crónicas singleplayer: identidad exacta, eventos reales deduplicados, hazañas/títulos, resultados narrativos, tabla local, historial permanente y pruebas de persistencia.
+- [x] Ajustar derrumbe (1–2 refuerzos, 20 s de gracia), mapa sin etiquetas superpuestas, descifrado y susto comprobados, desgaste/necesidades lentos, mochila de 2000 con pesos/precios, más suministros/pactos/espejos y dos subclases por clase; 74 pruebas y compra/descifrado en partida verificados.
+- [x] Fragmentos reales de enemigos en cada impacto melee y estallido con críticos mortales o daño mortal ≥ un tercio de vida máxima; física y 21 pruebas verificadas, golpe de espada y estallido observados en partida.
+- [x] Reducir pausas de selección/inicio y carga de texturas sin alterar reglas.
+- [x] Optimizar renderizado fuera de vista; comprobar PC y tamaño celular en navegador, pendiente medición en dispositivo real.
+- [x] Zona Prohibida por nivel con rutas nuevas y enemigos más fuertes.
+- [x] Habilidades y pasivas por clase visibles en la Mochila.
+- [x] Enemigos: saltar o teletransportarse si quedan atascados.
+- [x] Empujes: golpes contra paredes, choques entre enemigos en cadena y más daño a derribados.
+- [x] Comparar estadísticas y efectos de armas y equipar desde la comparación.
+- [x] Mejorar filtros, orden y progreso de mochila en pantallas pequeñas.
+- [x] Recomendar armas del inventario mediante AI Gateway según estilo del jugador.
+- [x] Desbloquear misiones al conversar con el vendedor, entregar y recibir recompensas equilibradas.
+- [x] Probar reglas y flujos visibles de mochila, IA y vendedor.
+- [x] Prioridad: reducir y separar botones Android, corregir arrastre de cámara y mostrar recarga; verificar gestos y recarga.
+- [x] Comprobar que el inventario muestra armas bloqueadas y el requisito exacto para utilizarlas también en Android.
+- [x] Restringir el uso de armas potentes por nivel y mostrar requisitos sin impedir obtenerlas.
+- [x] Añadir revelaciones únicas del mercader en niveles 1/3/6/10 conservadas entre sesiones.
+- [x] Probar restricciones, conversaciones, guardado y flujo visible del juego.
+- [x] Evolución progresiva de enemigos + animación HUD de amenaza
+- [x] Rehacer recortes HUD conservando rellenos oscuros internos
+- [x] Detonar barriles con proyectiles rápidos y mostrar explosiones animadas
+- [x] Ajustes: activar/desactivar sonido y señal visual de retirada, volumen, tamaño, intensidad
+- [x] Mando: cruceta "hat" de un eje, lectura segura de mandos y aviso al conectar (PC/Android).
+- [x] Android: botones más separados y botón Machacar con su propio sitio.
+- [x] Mira a distancia más pequeña y precisa.
+- [x] Etiqueta mini sobre enemigos: nombre, variante, #n/total y tiempo para atacar/alejarse.
+- [x] Pantalla de carga con progreso real, verificación de texturas y entrada suave; precarga gradual de zonas cercanas.
+- [x] Menú de clases con nombres enteros y tamaño fluido.
+- [x] Viento leve, contrarrestado al moverse.
+- [x] Sin silla pequeña; la banca grande recarga lumbre.
+- [x] Avisos de hambre/sed sin drenar vida.
+- [x] Mercader errante raro y lejano; objetos y puertas separados; interacción sólo con lo más cercano y delante; avisos de puertas.
+- [x] Puntaje en HUD, recuento final con calificación, consejo y bono de fichas.
+- [ ] Menú de inicio: listar abajo del todo todos los controles y mecánicas de PC y mando/joystick.
+- [ ] Conductos bajos: marcarlos con color o borde claro que indique "pasar agachado".
+- [x] Etiquetas de enemigos nítidas, barra de vida más visible, tarjetas de pacto con título horizontal centrado.
+- [x] EXPEDITION COLLAPSE: documento → código → mapa → guarida → jefe → colapso con regreso al portal.
+- [x] PALIMPSESTOS: libro, bancas, investigación con 8 acertijos, diccionario, diario y recompensas persistentes.
+
+- [x] Partículas de movimiento: polvo/piedritas al correr, aterrizar y saltar; goteos ambientales
+- [x] Efectos: golpes en pared, agujeros de bala, cuerpos y decorados que vuelan con explosiones y se rompen en trozos, fuego que parpadea, plantas que se mecen, ojos que brillan, fuentes con charcos, sombras según la luz, líneas de velocidad al deslizar/dashear
+- [x] Armas que se gastan y fallan; Forja (reparar, subir nivel, añadir efecto) con materiales o con oro en el mercader.
+- [x] Comparar arma/armadura puesta contra la seleccionada con el ratón en la Mochila.
+- [x] Enemigos suicidas, tiradores con armas y lanzabombas en parábola; nubes de proyectiles rebotantes de jefes (estilo bullet hell).
+- [x] Tema claro alternable y botón RGB.
+- [x] Identificar las 20 imágenes secundarias del HUD enlazadas al proyecto anterior; sustituirlas por arte gótico recortado conservando rellenos; 20/20 decodificadas, cero fallas al iniciar y adornos visibles en partida.
+- [x] Ficha de resultados con clase, dificultad, equipo, causa y media mundial del piso.
+- [x] Pantalla completa al iniciar, F11/Esc para salir, ratón liberado en menús y recuperado al volver.
+- [x] Medias por piso: partidas, jugadores, muertes, tiempo, bajas y puntaje.
+- [x] Variantes de forja y epítetos nuevos en armas aleatorias.
+- [x] Inscripciones explicadas con ejemplos por arma y enlazadas a la wiki.
+- [x] Prueba del mercader actualizada a la tienda ampliada (19 artículos).
+- [x] Analítica: inicio, muerte, piso completado, victoria y resultado compartido.
+- [x] Imagen descargable y compartible de la ficha de resultados.
+- [x] Ritmo: cuenta s/ms sincronizada con la salida de audio, mini críticos con destello/temblor/pausa breve; aviso de conducto bajo; idioma en menú de pausa.
+- [x] Habilidad activa con botón propio por clase y subclase (efecto/buff/proyectil, recarga por tiempo, muertes o situaciones).
+- [x] Elegir entre 2+ habilidades activas por clase/subclase, con explicación y recarga visibles.
+- [x] Rendimiento (HUD/minimapa adaptativos, menos escrituras de estilo, traducción en caché), balanceo más visible, Tirano y peleas entre enemigos, conductos y Tirano en el mapa, inglés en HUD.
+- [x] Proyecto traído a este espacio: nube nueva con tablas, acceso Google, canción re-subida; 444 pruebas OK y partida probada sin errores.
+- [x] Pantalla de error se recupera sola recargando una vez (enlaces compartidos).
+- [x] Rendimiento: arreglado fallo de partículas por cuadro; partida larga sin errores. Fluidez real en GPU pendiente de probar en el dispositivo del usuario.
+- [x] Piso 1 jugado de principio a fin por jugador automático sin trampas (documento → relicario → mapa → jefe → derrumbe → portal → piso 2); fuga de memoria del historial arreglada.
+- [x] Objetos agarrables: brillo, giro, pulso y flotación (grabFx).
+- [x] Vista 3D volumétrica con sprites del pack El Desconocido; movimiento y capturas de ordenador/móvil verificados.
+- [x] Pantalla de progreso del personaje sin pausa (botón o L); actualización de XP verificada.
+- [x] Colisión de escombros durante la caída, sin doble daño; pruebas puras y de combate aprobadas.
+- [x] Sonidos: recursos y cofres
+- [x] Optimizar para móvil/Android
+- [x] Mirror existing character sprites to fill missing directions/animation frames
+- [x] Camera/POV farther away (less dizzy, better depth)
+- [x] Currency always called 'fichas' (no oro/dinero/pesos/gold)
+- [x] Map/report the class active skill button
+- [x] Fix: B key opens a menu instead of class skill
+- [x] Performance PC/Android: remove stutters; verify game starts on Android mobile web
+- [x] Shop sell sound plays
+- [x] Apuntado asistido leve en cámaras externas; sprites nítidos (sin FXAA/aberración, render 1:1)
+- [x] Indicador de guardado en la nube con último sync y reintento
+- [x] Crónica personalizada IA de la partida (ficha final)
+- [x] Colisiones de zonas elevadas: jugador y enemigos no se atascan; enemigos más listos para salir
+- [x] Botón de recargar balas en el mando (X sin nada delante)
+- [x] Multijugador fase 1–3: servidor de salas, salas públicas/privadas, código e invitación, lista de jugadores, clase/rol, listo/inicio, reconexión (probado con dos navegadores reales).
+- [x] Multijugador fase 4–6: mundo compartido simulado por el servidor (enemigos repartidos, botín validado), roles, puntuación individual, marcador y podio con títulos.
+- [x] Multijugador fase 7–9: intercambio, robo por la espalda, palancas, altar de la codicia, cofre sellado, contratos secretos, duelo por arma legendaria, votación, emboscadas, jefe errante, escasez y extracción de emergencia; modos cooperativa/traicionera/caótica.
+- [x] Multijugador fase 10: tablas de partidas, resultados, perfil online y arcón con reclamo único; 15 pruebas de reglas.
+- [x] Servidor de salas para Cloudflare (Durable Objects) creado y probado en local con 2 y 4 clientes reales, reconexión incluida.
+- [ ] Publicar `cloudflare-server` con `npx wrangler deploy` — requiere la cuenta de Cloudflare del usuario.
+- [x] Figuras más nítidas: menos brillo, sombra de oclusión, niebla y realce sobre jugador y enemigos.
+- [ ] Guardar resultados online: falta el secreto MP_SERVER_SECRET (en el juego y en el servidor) y APP_URL tras publicar.
+- [ ] Probar una partida online completa con cuentas Google reales en dispositivos distintos — requiere el servidor publicado.
+
+- [x] Figuras del jugador, compañeros y enemigos más visibles en todas las cámaras (contorno, contraste, niebla limitada, tamaño en vistas externas).
+- [ ] HUD multijugador: barra de vida de cada jugador, puntuación en vivo y chat en pantalla.
+- [ ] Fase 2 multijugador: revisar puntuación, botín, inventario y eventos dinámicos en partida.
+- [ ] Servidor de expedición: menos latencia y movimiento de jugadores más fluido (predicción local).
+- [x] IA de títulos, frases de enemigos y consejos de estrategia llamadas en vivo con respuesta correcta.
+- [x] Sprites de jugador y enemigos nítidos: en la vista 3D no reciben luz/sombras/reflejos; en primera persona la luz sólo los tiñe un 30 %.
+- [x] Indicador de estado del servidor en Multijugador con mensajes claros.
+- [x] Prueba con dos navegadores (e2e/two-browsers.py) pasa contra el servidor en local.
+- [ ] Ejecutar e2e/two-browsers.py contra el servidor publicado — requiere que el usuario lo despliegue.
+- [x] Juego en solitario vuelve a cargar (hoja del personaje y canción re-subidas, fallo de fotogramas corregido).
+- [x] Métricas y registros del servidor de salas (salas, sesiones, reconexiones).
+- [x] Títulos de IA y frases de enemigos comprobados en vivo.
+- [x] Multijugador: aviso general con efecto, sonido y +300 puntos al ganar un título en partida.
+- [x] Enlaces de invitación que abren la sala y permiten unirse con un toque.
+- [x] Compartir estadísticas de partida + consejos de estrategia por IA (solo y multijugador), probado en vivo.
+- [x] Botón de multijugador abre sin fallos; el aviso rojo era la dirección por defecto del servidor, que no existe en Cloudflare.
+- [x] Nombre, nivel, vida, título, clase y silueta brillante de color único sobre cada jugador.
+- [x] Botín por enemigo: armas y modificadores específicos con probabilidades distintas (nada asegurado), con pruebas.
+- [x] Wiki de armas: probabilidades y de qué enemigos se obtiene cada una.
+- [x] Multijugador: subida de nivel equilibrada; gran diferencia de nivel domina en PvP/fuego amigo, con pruebas.
+- [x] Enemigos: animación de esquiva (temblor, paso lateral o salto) sincronizada con su IA, con pruebas.
+- [x] Importado a este proyecto: nube nueva (tablas, Google), hoja del personaje reconstruida, canción del piso 1 re-subida; 546 pruebas OK.
+- [x] Servidor de salas compilado con el juego actual y probado en local con dos navegadores reales (crear, unirse, movimiento, reconexión).
+- [x] Servidor de salas listo para publicar gratis desde GitHub (arreglado: antes fallaba al instalarse solo); 4 jugadores reales probados en local.
+- [x] Servidor publicado en la cuenta Cloudflare del usuario (https://ars-anima-rooms.nightbhgs10.workers.dev) y usado por el juego.
+- [x] Juego publicado, APP_URL y MP_SERVER_SECRET configurados en ambos lados (clave verificada; guardado completo pendiente de una partida con cuentas).
+- [x] Auditoría, despliegue en Production y verificación completa del servidor de salas en la cuenta Cloudflare del usuario (health, rooms, salas, WebSocket, 2 jugadores, movimiento, enemigos, combate, puntuaciones, reconexión) + informe.
+- [x] Publicar el juego, crear MP_SERVER_SECRET en ambos lados y poner APP_URL en el servidor.
+- [x] Botín del servidor conectado a la wiki/arsenal de cada jugador; búsqueda y filtros en la lista de salas públicas.
+- [x] Discord oculto protegido en la base de datos.
+- [x] Ranking MULTIJUGADOR en la Crónica mundial y tus últimas partidas online (guardado probado con el juego publicado).
+- [ ] Publicación automática del servidor al cambiar el juego — espera a que el usuario conecte GitHub en Lovable y en Cloudflare (Workers Builds).
+- [x] Jugador trabado tras matar e interactuar con enemigo.
+- [x] Reducir lag/ping notorio en multijugador (cliente). Servidor a 20 Hz y colores nuevos esperan re-publicar el servidor de salas.
+- [x] Controles Android más grandes; quitar botón casa (pantalla completa) en móvil.
+- [x] Botón de recarga en mando en un botón libre.
+- [x] Partículas de polvo/piedritas en multijugador.
+- [x] Mejores números de daño.
+- [x] Optimizar vista primera persona.
+- [x] Color de silueta por clase/subclase/nombre/rol con algo de azar (activo al re-publicar el servidor de salas).
+- [x] Sprite de otros jugadores según ángulo de vista.
+- [x] Re-publicar el servidor de salas (Cloudflare) con estos cambios — requiere conectar Cloudflare en este espacio o el despliegue desde GitHub.
+- [x] Indicador de ping/reconexión en partida.
+- [x] Apartado en el menú con puntuaciones y detalles de jugadores.
+- [x] Compartir métricas de FPS/ping/dispositivo + recomendaciones IA.
+- [x] Panel opcional de FPS y tiempo de fotograma.
+- [ ] Clase secreta P.A.R.I.A.H (desbloqueo + pasivas).
+- [ ] Resultados de salas al proyecto nuevo (ranking).
+- [ ] Lobby/botín/wiki/IA con servidor publicado (revisar).
+- [ ] Sprite único de puño de P.A.R.I.A.H (papel escrito, caracteres borrosos).
+
+## P.A.R.I.A.H y servidor
+- [x] Hitbox ajustada a la silueta (jugador y PvP).
+- [x] Clase secreta P.A.R.I.A.H: secuencia oculta, código de prueba, pasivas, Ruptura, Ruinas, Impulso, Vacío, Anatomía, progresión.
+- [x] Servidor de salas publicado verificado con 4 clientes.
+- [ ] Publicar el servidor actualizado en Cloudflare — espera el token de Cloudflare del usuario.
+- [ ] Mover el ranking del juego viejo — su base de datos está en otra cuenta, sin acceso.

@@ -1,0 +1,21 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { Game, emptyInput } from './engine';
+import { CLASSES, WEAPONS } from './data';
+import { aimedReady, meleeContains, meleeMode, rewardRarity } from './weapon-modes';
+afterEach(()=>vi.restoreAllMocks());
+const weapon=(type:string)=>{const w=WEAPONS.find(w=>w.type===type);if(!w)throw new Error('Missing weapon');return w;};
+function game(){const cls=CLASSES[0];if(!cls)throw new Error('Missing class');const g=new Game();g.start(cls);g.map.fill(0);g.restRoom=null;g.enemies=[];g.pickups=[];g.alteredZones=[];g.bossRoom=null;g.zones=[];g.rooms=[];g.px=g.py=15.5;g.pz=0;g.ang=g.pitch=g.vx=g.vy=0;return g;}
+describe('Weapon rules',()=>{
+  it('hammer hits around the player including behind',()=>expect(meleeContains(weapon('MARTILLO'),false,-1.5,0,0)).toBe(true));
+  it('spear is straight, not a sideways sweep',()=>{expect(meleeContains(weapon('LANZA'),false,2.5,0,0)).toBe(true);expect(meleeContains(weapon('LANZA'),false,1,1,0)).toBe(false);});
+  it('dagger is a short straight strike',()=>{expect(meleeContains(weapon('DAGA'),false,1,0,0)).toBe(true);expect(meleeContains(weapon('DAGA'),false,1,.6,0)).toBe(false);});
+  it('sword cuts a forward arc',()=>{expect(meleeContains(weapon('ESPADA'),false,1,1,0)).toBe(true);expect(meleeContains(weapon('ESPADA'),false,-1,0,0)).toBe(false);});
+  it('heavy weapons recover and charge slower; alternate recovery exceeds basic',()=>{expect(meleeMode(weapon('MARTILLO'),true).charge).toBeGreaterThan(meleeMode(weapon('DAGA'),true).charge);expect(meleeMode(weapon('MARTILLO'),true).cooldown).toBeGreaterThan(meleeMode(weapon('MARTILLO'),false).cooldown);});
+  it('aimed critical requires one complete second',()=>{expect(aimedReady(true,.999)).toBe(false);expect(aimedReady(true,1)).toBe(true);expect(aimedReady(false,1)).toBe(false);});
+  it('movement resets actual aim progress',()=>{const g=game();g.slot=1;for(let i=0;i<20;i++)g.update(.05,{...emptyInput(),alternate:true});expect(g.aimT).toBe(1);g.update(.05,{...emptyInput(),alternate:true,my:1});expect(g.aimT).toBe(0);});
+  it('prepared shot deals more damage and resets preparation',()=>{vi.spyOn(Math,'random').mockReturnValue(.5);const shoot=(precision:boolean)=>{const g=game();g.slot=1;g.spawn('sombra',18.5,15.5);const e=g.enemies[0];if(!e)throw new Error('Missing enemy');e.aware=true;e.hp=e.hpMax=1000;e.def=0;e.stagger=0;g.aimT=precision?1:0;g.update(.01,{...emptyInput(),alternate:precision,attack:true});expect(g.aimT).toBe(0);for(let i=0;i<40&&g.projs.length;i++)g.update(.02,emptyInput());return 1000-e.hp;};expect(shoot(true)).toBeGreaterThan(shoot(false)*2);});
+  it('key seal guarantees rare treasure exactly once for both door leaves',()=>{const g=game();const id=16*40+16;g.map[id]=g.map[id+1]=6;g.seals[id]=g.seals[id+1]={kind:'key',value:1,group:[id,id+1]};g.keys=1;expect(g.openDoor(16,16)).toBe(true);expect(g.keys).toBe(0);expect(g.pickups.filter(p=>p.kind==='chest').map(p=>p.quality)).toEqual([2]);g.openDoor(17,16);expect(g.pickups.filter(p=>p.kind==='chest')).toHaveLength(1);});
+  it('boss and miniboss rewards exceed normal quality',()=>{expect(rewardRarity('miniBoss',1)).toBe(3);expect(rewardRarity('boss',1)).toBe(4);const g=game();g.spawn('carcelero',18,15);const e=g.enemies[0];if(!e)throw new Error('Missing enemy');e.miniBoss=true;g.killEnemy(e);expect(g.pickups.some(p=>p.item?.rarity===3)).toBe(true);});
+  it('group hits cannot stack within the same instant but resume after grace',()=>{const g=game();const hp=g.hp;g.hurtPlayer(8,'SOMBRA');g.hurtPlayer(8,'SOMBRA');expect(g.hp).toBe(hp-6.8);g.update(.05,emptyInput());g.update(.05,emptyInput());g.update(.05,emptyInput());g.update(.05,emptyInput());const before=g.hp;g.hurtPlayer(8,'SOMBRA');expect(g.hp).toBeLessThan(before);});
+  it('combat kills grant real levels and carry surplus XP',()=>{const g=game();g.xp=95;g.spawn('sombra',18,15);const e=g.enemies[0];if(!e)throw new Error('Missing enemy');g.killEnemy(e);expect(g.level).toBe(2);expect(g.xp).toBeGreaterThan(0);expect(g.sp).toBe(2);expect(g.mode).toBe('choice');});
+});
