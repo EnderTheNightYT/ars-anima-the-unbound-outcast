@@ -38,7 +38,7 @@ export function liveStrategyFromGame(g: GameLike, note?: string): LiveStrategyIn
     const d = Math.hypot(e.x - g.px, e.y - g.py); if (d > 14) continue;
     const tag = e.tyrant ? "jefe" : e.miniBoss ? "minijefe" : e.elite ? `élite ${e.elite}`.slice(0, 30) : undefined;
     const key = `${e.kind}|${tag ?? ""}`, cur = groups.get(key);
-    if (cur) { cur.count++; cur.nearest = Math.min(cur.nearest, d); } else groups.set(key, { kind: String(e.kind).slice(0, 40), count: 1, nearest: d, tag });
+    if (cur) { cur.count++; cur.nearest = Math.min(cur.nearest, d); } else groups.set(key, { kind: String(e.kind).slice(0, 40), count: 1, nearest: d, ...(tag ? { tag } : {}) });
   }
   const encounter = [...groups.values()].sort((a, b) => a.nearest - b.nearest).slice(0, 8).map(x => ({ ...x, nearest: Math.round(x.nearest * 10) / 10 }));
   const statuses = [g.burn > 0 && "quemado", g.poison > 0 && "envenenado", g.bleed > 0 && "sangrando", g.fatigue > 60 && "fatigado"].filter(Boolean) as string[];
