@@ -66,3 +66,5 @@
 - GPU lighting never lets reflections replace floor/ceiling/sprite albedo (diffuse floor 0.85, ambient spec damped) and FXAA skips near depth edges. Why: floors went mirror-black and sprites blurred in first person.
 - WebGPU G-buffer color texture needs RENDER_ATTACHMENT usage for copyExternalImageToTexture. Why: without it every texture rendered blank.
 - Actor legibility (rim outline, pixel contrast, actor fog cap, external/aerial scale, 3D emissive) lives in browser-safe `sprite-legibility.ts` (tested); engine and sprite-world only wrap images with `legible()`; live canvases are flagged so tint/fog variants are redrawn. Why: visibility tuning stays presentation-only and in one place.
+- P.A.R.I.A.H secret class: pure rules in `src/game/pariah.ts`, engine-facing runtime in `src/game/pariah-runtime.ts`; every engine hook is gated by `isPariah(cls.id)` and its weapons live in `PARIAH_WEAPONS`, never in `WEAPONS` — keeps other classes, loot, wiki and RNG untouched.
+- Player hitbox is silhouette-based (`src/game/hitbox.ts`), shared by the single-player engine and the PvP sim so both judge hits identically.
