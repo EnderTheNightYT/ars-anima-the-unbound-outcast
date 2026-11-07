@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * P.A.R.I.A.H en partida: integra las reglas de `pariah.ts` con el motor existente (combate, Lumbre,
- * proyectiles, empujes, heridas y renderizado). Todas las funciones salen inmediatamente si la clase
- * activa no es P.A.R.I.A.H., así que el resto de clases no se ve afectado.
+ * proyectiles, empujes, heridas y renderizado). Los efectos de clase se aíslan de las demás clases;
+ * la animación de recogida compartida vive en pickup-animation.ts.
  */
 import {
   PARIAH, isPariah, euphoria, paroxysm, painBonus, fistDamage, napeHit, takenMult, accelMult, splitPain,
@@ -21,14 +21,12 @@ export interface PariahRun {
   ruptureCd: number; ruptureT: number; ruptureWave: number; ruptureHit: number[][];
   impulse: number; impulseCd: number; impulseT: number;
   voidT: number; voidKind: VoidKind | ""; voidLen: number; voidNext: number; voidRest: number; phantoms: Phantom[]; soundT: number;
-  grabT: number; grabSprite: string;
 }
 export const newPariahRun = (): PariahRun => ({
   pain: 0, moveT: 0, stopT: 0, chainMax: 0, parox: false,
   ruptureCd: 0, ruptureT: -1, ruptureWave: -1, ruptureHit: [[], [], []],
   impulse: 0, impulseCd: 0, impulseT: 0,
   voidT: 0, voidKind: "", voidLen: 0, voidNext: VOID.interval[1], voidRest: 0, phantoms: [], soundT: 30,
-  grabT: 0, grabSprite: "",
 });
 
 export const on = (g: G) => isPariah(g.cls?.id);
@@ -244,7 +242,6 @@ export function update(g: G, dt: number, inp: G, grounded: boolean) {
   if (g.wounds?.TORSO && !g.blocking) g.stam = Math.max(0, g.stam - dt * .6 * (1 + woundLevel(g.wounds.TORSO) * .3));
   // Heridas críticas: no se curan esperando.
   for (const k of Object.keys(g.wounds ?? {})) if (woundLevel(g.wounds[k]) === 3) g.wounds[k] = Math.max(g.wounds[k], 999);
-  if (P.grabT > 0) P.grabT = Math.max(0, P.grabT - dt);
   updateRupture(g, dt);
   updateVoid(g, dt);
 }
@@ -264,22 +261,12 @@ export function throwKeg(g: G, k: G, radius: number, dmg: number) {
   g.float("¡BARRIL LANZADO!", "#ff9a2a"); g.onSound("swing");
 }
 
-/** Animación de agarre: palma abierta y luego el objeto alzado. */
-export function grabFx(g: G, sprite: string) { if (!on(g)) return; g.pariah.grabT = .9; g.pariah.grabSprite = sprite; }
-
 // ---------------- Render ----------------
 export function drawFists(g: G, ctx: CanvasRenderingContext2D, W: number, H: number) {
   const P: PariahRun = g.pariah, fist = g.sprites.pariahFist, hammer = g.sprites.pariahHammer, palm = g.sprites.pariahPalm;
   if (!fist || !hammer || !palm) return false;
   const sp = Math.hypot(g.vx, g.vy), bobX = Math.sin(g.time * 7) * 6 * Math.min(1, sp / 3), bobY = Math.abs(Math.cos(g.time * 7)) * 6 * Math.min(1, sp / 3);
   const draw = (img: G, x: number, y: number, h: number, rot = 0, flip = false) => { ctx.save(); ctx.translate(x, y); ctx.rotate(rot); if (flip) ctx.scale(-1, 1); const w = h * img.width / img.height; ctx.drawImage(img, -w / 2, -h, w, h); ctx.restore(); };
-  // Agarre: palma abierta (0–40 %) y luego el objeto sostenido hacia arriba.
-  if (P.grabT > 0) {
-    const k = 1 - P.grabT / .9, lift = k < .4 ? 0 : Math.min(1, (k - .4) / .3);
-    draw(palm, W * .62 + bobX, H + 30 - lift * 40, 150 + lift * 10, -.15);
-    const item = g.sprites[P.grabSprite]; if (item && k >= .4) { const s = 34; ctx.drawImage(item, W * .62 - s / 2 + bobX - 6, H - 120 - lift * 40, s, s * item.height / item.width); }
-    return true;
-  }
   // Ruptura: los puños unidos golpean el suelo tres veces.
   if (P.ruptureT >= 0) {
     const t = P.ruptureT < RUPTURE.windup ? 0 : ((P.ruptureT - RUPTURE.windup) % RUPTURE.gap) / RUPTURE.gap, up = P.ruptureT < RUPTURE.windup ? P.ruptureT / RUPTURE.windup : t < .25 ? 1 - t * 4 : (t - .25) / .75;
