@@ -68,6 +68,7 @@ import { makeDmgNum, stepDmgNums, dmgNumLook, DMG_NUM, type DmgNum } from "./dmg
 import { sweptProjectileHits, meleeReachesBody } from "./hitbox";
 import * as PX from "./pariah-runtime";
 import { newPickupAnimation, PICKUP_DURATION, drawPickup } from "./pickup-animation";
+import { PORTAL } from './expedition';
 import { isPariah, PARIAH_WEAPONS, pariahXp, growthAttrs, PARIAH } from "./pariah";
 import { BODY_RADIUS, BODY_HEIGHT, cellVolume, playerHitbox, projectileHitsPlayer, LOW_PROFILE, JUMP, clampCeiling, combatXpMultiplier, sealSatisfied, type DoorSeal, propBreakOutcome, SPLINTER, levelBonus, POWDER_KEG, kegDamage, EXPOSE, propMaterial, SQUAD, shieldBlocks, squadDamageFactor, packSpeed, drumRoll, backstab, inkFactor } from "./world-rules";
 
@@ -391,22 +392,39 @@ export class Game {
     const at = this.collapsePortalSpot(); this.collapse.portal = at; this.pickups.push({ x: at.x, y: at.y, kind: "portal", bob: 0 });
     for (const e of this.enemies) if (!e.dead) e.aware = true;
     this.shake = 0.9; this.onSound("explosion"); this.float(`EXPEDITION COLLAPSE · ${max}s`, "#ff3355");
-    this.msg(`¡EL ESCENARIO COLAPSA! Un portal se abrió en el refugio (marcado en blanco). Vuelve y crúzalo antes de ${max}s.`);
+    this.msg(`¡EL ESCENARIO COLAPSA! Un portal se abrió (rombo turquesa y dorado en el mapa). Vuelve y crúzalo antes de ${max}s.`);
   }
   /** Random, easily reachable room centre (not the lair, not the room the player is in). */
   collapsePortalSpot() {
     const rr = this.restRoom;
-    if (rr) { const busy = this.pickups.filter(k => !k.used && k.kind !== "portal"); const cands: { x: number; y: number }[] = [];
+    if (rr) { const busy = [...this.pickups.filter(k => !k.used && k.kind !== "portal"), ...this.scenicProps]; const cands: { x: number; y: number }[] = [];
       for (let yy = rr.y + 1; yy < rr.y + rr.h - 1; yy++) for (let xx = rr.x + 1; xx < rr.x + rr.w - 1; xx++) { const c = { x: xx + .5, y: yy + .5 }; if (!this.solid(c.x, c.y) && this.cell(c.x, c.y) === 0) cands.push(c); }
       const at = refugePortalSpot(cands, busy); if (at) return at; }
     const inRoom = (r: { x: number; y: number; w: number; h: number }) => this.px >= r.x && this.px < r.x + r.w && this.py >= r.y && this.py < r.y + r.h;
-    const busy = this.pickups.filter(k => !k.used && (k.kind !== "decor" || this.isBench(k) || k.deco === "powder"));
+    const busy = [...this.pickups.filter(k => !k.used && k.kind !== 'portal'), ...this.scenicProps];
     const clear = (c: { x: number; y: number }, d: number) => busy.every(k => Math.hypot(k.x - c.x, k.y - c.y) >= d);
     const cands: { x: number; y: number }[] = [];
     for (const r of this.rooms) { if (r === this.bossRoom || r === this.restRoom || inRoom(r)) continue;
       for (let yy = r.y + 1; yy < r.y + r.h - 1; yy++) for (let xx = r.x + 1; xx < r.x + r.w - 1; xx++) { const c = { x: xx + .5, y: yy + .5 }; if (!this.solid(c.x, c.y) && this.cell(c.x, c.y) === 0) cands.push(c); } }
-    for (const d of [4, 3, 2]) { const ok = cands.filter(c => clear(c, d)); const pick = ok[Math.floor(Math.random() * ok.length)]; if (pick) return pick; }
-    const s = this.rooms[0]!; return { x: s.x + 1.5, y: s.y + 1.5 };
+    const at = refugePortalSpot(cands.filter(c => clear(c, PORTAL.clearance)), busy); if (at) return at;
+    // Crowded refuge: reserve an empty patch, never displacing the merchant or functional props.
+    const fixed = this.pickups.filter(k => !k.used && k.kind !== 'portal' && (k.kind !== 'decor' || this.isBench(k) || ['powder','healing_brazier','fountain'].includes(k.deco ?? '')));
+    const fallback: { x: number; y: number }[] = [];
+    for (const r of this.rooms) for (let y = r.y + 1; y < r.y + r.h - 1; y++) for (let x = r.x + 1; x < r.x + r.w - 1; x++) {
+      const c = { x: x + .5, y: y + .5 }; if (this.cell(c.x, c.y) === 0 && !this.solid(c.x, c.y) && fixed.every(k => Math.hypot(k.x - c.x, k.y - c.y) >= PORTAL.clearance)) fallback.push(c);
+    }
+    const spot = refugePortalSpot(fallback, fixed) ?? { x: this.px, y: this.py };
+    for (const p of this.pickups) if (p.kind === 'decor' && !fixed.includes(p) && Math.hypot(p.x - spot.x, p.y - spot.y) < PORTAL.clearance) p.used = true;
+    this.scenicProps = this.scenicProps.filter(p => Math.hypot(p.x - spot.x, p.y - spot.y) >= PORTAL.clearance);
+    return spot;
+  }
+  /** Repair independent floor-save flags/pickups without restarting collapse or granting access. */
+  ensurePortal() {
+    if (this.exp.extracted || (this.collapse && this.collapse.t <= 0) || (this.bossRequired && !this.bossDead && !this.collapse)) return;
+    if (this.pickups.some(p => p.kind === 'portal' && !p.used)) return;
+    const at = this.collapse?.portal ?? this.collapsePortalSpot();
+    if (this.collapse) this.collapse.portal = at;
+    this.pickups.push({ x: at.x, y: at.y, kind: 'portal', bob: 0 });
   }
   /** Debris impact: area damage with falloff, breaks props/inner walls and sets off powder kegs. */
   debrisImpact(x: number, y: number) {
@@ -812,7 +830,8 @@ export class Game {
     for (const p of this.pickups) {
       if (p.used) continue; const powder = p.deco === "powder";
       if (!(KINDS.includes(p.kind) || this.isBench(p) || powder)) continue; if (p.kind === "trap" && !p.armed) continue;
-      const d = Math.hypot(p.x - this.px, p.y - this.py); if (d > (powder ? POWDER_KEG.reach : 1.4)) continue;
+      const d = Math.hypot(p.x - this.px, p.y - this.py); if (d > (p.kind === 'portal' ? PORTAL.interactRadius : powder ? POWDER_KEG.reach : 1.4)) continue;
+      if (p.kind === 'portal' && !this.los(this.px, this.py, p.x, p.y, this.pz + .5, this.floorHeight(p.x, p.y) + .5)) continue;
       const diff = Math.abs(((Math.atan2(p.y - this.py, p.x - this.px) - this.ang) % (Math.PI * 2) + Math.PI * 3) % (Math.PI * 2) - Math.PI);
       if (d > .55 && diff > .95) continue; const sc = d + diff * .7; if (sc < bs) { bs = sc; best = p; }
     }
@@ -827,7 +846,7 @@ export class Game {
     const rank = (p: Pickup) => fixed(p) ? 2 : big(p) ? 1 : 0; const placed: Pickup[] = [];
     for (const p of [...this.pickups].sort((a, b) => rank(b) - rank(a))) {
       if (p.used) continue;
-      const minD = (q: Pickup) => big(p) && big(q) ? 2 : (p.kind === "decor" || q.kind === "decor") ? .9 : .6;
+      const minD = (q: Pickup) => p.kind === 'portal' || q.kind === 'portal' ? PORTAL.clearance : big(p) && big(q) ? 2 : (p.kind === "decor" || q.kind === "decor") ? .9 : .6;
       const ok = (x: number, y: number) => !this.solid(x, y, this.floorHeight(x, y)) && !nearDoor(x, y) && placed.every(q => Math.hypot(q.x - x, q.y - y) >= minD(q));
       if (fixed(p) || ok(p.x, p.y)) { placed.push(p); continue; }
       const room = this.rooms.find(r => p.x >= r.x && p.x < r.x + r.w && p.y >= r.y && p.y < r.y + r.h); let done = false;
@@ -1139,6 +1158,7 @@ export class Game {
     this.genFloor(true);
     this.score.load(s.score);
     const fsOk = applyFloor(this as never, s.fields.floorState as FloorState | undefined);
+    this.ensurePortal();
     const ps = s.fields.pos as { x: number; y: number; ang: number } | undefined;
     if (ps && Number.isFinite(ps.x) && Number.isFinite(ps.y) && !this.solid(ps.x, ps.y)) { this.px = ps.x; this.py = ps.y; this.ang = Number(ps.ang) || this.ang; this.pz = this.floorHeight(); }
     this.mode = "play"; this.msg(`Reanudas la run en el nivel ${this.floor}: ${this.region.name}${fsOk ? " — progreso del piso restaurado" : ""}.`); this.onUI();
@@ -2003,7 +2023,9 @@ export class Game {
     this.updateCollapse(dt);
     if (this.gloom > 0) this.gloom = Math.max(0, this.gloom - dt * .045);
     this.portalMsgT = Math.max(0, this.portalMsgT - dt);
-    if (this.mode === "play") { const pt = this.pickups.find(k => k.kind === "portal" && !k.used && Math.hypot(k.x - this.px, k.y - this.py) < 1.05); if (pt) this.usePortal(pt, true); }
+    this.ensurePortal();
+    if (this.mode === "play") { const pt = this.pickups.find(k => k.kind === "portal" && !k.used && Math.hypot(k.x - this.px, k.y - this.py) < PORTAL.enterRadius && Math.abs(this.pz - this.floorHeight(k.x,k.y)) < PORTAL.height && this.los(this.px,this.py,k.x,k.y,this.pz+.5,this.floorHeight(k.x,k.y)+.5)); if (pt) this.usePortal(pt, true); }
+    if (this.mode !== 'play') { this.prev = { ...inp }; return; }
     inp={...inp}; if(this.denial?.action === "dash")inp.dash=false; if(this.denial?.action === "magic") {inp.nova=false;inp.pact=false;if(this.slot===1 && this.ranged.base?.type==="FOCO")inp.attack=false;}
     if (this.slowmo > 0) { this.slowmo -= dt; }
     const edt = this.slowmo > 0 ? dt * 0.4 : dt; // enemigos ralentizados
@@ -3378,7 +3400,7 @@ export class Game {
             drawImg(this.frame(icon,pose,clock),p.sx,p.depth,gz,.25*f.pulse,undefined,f.flash,0,1,f.spin);
             blob(p.sx + Math.sin(this.time*3+pk.bob)*5/p.depth, p.depth, gz + .3 + ((this.time*.5+pk.bob)%1)*.25, .012, c, true);
             return; }
-          drawImg(this.frame(icon,pose,clock),p.sx,p.depth,this.floorHeight(pk.x,pk.y)+(magical||pk.kind==="lore"?bob:0),["shop","portal","sanctuary"].includes(pk.kind)?.55:.25,pk.kind==="portal"?"#7ad8ff":undefined);
+          drawImg(this.frame(icon,pose,clock),p.sx,p.depth,this.floorHeight(pk.x,pk.y)+(magical||pk.kind==="lore"?bob:0),pk.kind === 'portal' ? PORTAL.height : ["shop","sanctuary"].includes(pk.kind)?.55:.25,pk.kind==="portal"?"#7ad8ff":undefined);
           if (magical) { for (let n=0;n<3;n++) blob(p.sx+Math.sin(this.time*2+n*2)*8/p.depth,p.depth,.15+((this.time*.3+n*.3)%1)*.7,.012,pk.kind==="portal"||pk.kind==="palimpsest"||pk.kind==="folio"?"#7ad8ff":pk.kind==="mapfrag"||pk.kind==="cipherlock"?"#ffd34a":"#ff3759",true); }
           return; }
         if (pk.kind === "chest") { blob(p.sx, p.depth, 0.15, 0.22, pk.used ? "#3a2a1a" : "#8a5a2a"); blob(p.sx, p.depth, 0.22, 0.08, pk.used ? "#222" : "#ffd34a"); }

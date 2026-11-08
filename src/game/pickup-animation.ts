@@ -3,7 +3,7 @@ export const PICKUP_DURATION = .9;
 export const newPickupAnimation = () => ({ t: 0, sprite: "" });
 export type PickupAnimation = ReturnType<typeof newPickupAnimation>;
 export function drawPickup(g: { pickupAnimation: PickupAnimation; sprites: Record<string, HTMLImageElement | HTMLCanvasElement>; vx: number; vy: number; time: number }, ctx: CanvasRenderingContext2D, W: number, H: number) {
-  const P = g.pickupAnimation, palm = g.sprites.pariahPalm;
+  const P = g.pickupAnimation, palm = g.sprites["pariahPalm"];
   if (P.t <= 0 || !palm) return false;
   const k = 1 - P.t / PICKUP_DURATION, lift = k < .4 ? 0 : Math.min(1, (k - .4) / .3);
   const bob = Math.sin(g.time * 7) * 6 * Math.min(1, Math.hypot(g.vx, g.vy) / 3);

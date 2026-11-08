@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import type { Game } from './engine';
 import { ENEMY_TYPES } from './data';
+import { PORTAL } from './expedition';
 import { cellVolume } from './world-rules';
 import { CELL_H, PLAYER_SPRITE_SCALE, remoteFrame } from './player-sprite';
 import { rubbleHeight, RUBBLE_FALL } from './falling-rubble';
@@ -220,7 +221,7 @@ export class SpriteWorld {
     }
     for (const k of g.pickups) { if (k.used) continue;
       const key = k.deco ?? ({ item: 'relic', shop: 'shop', portal: 'rune', note: 'book', folio: 'book', mapfrag: 'map', cipherlock: 'chest', palimpsest: 'palimpsesto', sanctuary: 'rose' } as Record<string, string>)[k.kind] ?? k.kind;
-      this.billboard(g.frame(key, 'idle', k.bob * 12 % 12) ?? g.sprites[key], k.x, k.y, g.floorHeight(k.x, k.y) + (k.kind === 'decor' ? 0 : .08 + Math.sin(g.time * 2 + k.bob) * .03), k.kind === 'decor' || k.kind === 'shop' || k.kind === 'portal' ? .65 : .28);
+      this.billboard(g.frame(key, 'idle', k.bob * 12 % 12) ?? g.sprites[key], k.x, k.y, g.floorHeight(k.x, k.y) + (k.kind === 'decor' ? 0 : .08 + Math.sin(g.time * 2 + k.bob) * .03), k.kind === 'portal' ? PORTAL.height : k.kind === 'decor' || k.kind === 'shop' ? .65 : .28);
     }
     for(const p of g.scenicProps)this.billboard(g.frame(p.deco,'idle',g.time*8%12)??g.sprites[p.deco],p.x,p.y,g.floorHeight(p.x,p.y),.8);
     for (const p of g.projs) this.billboard(p.sprite ? g.projSprites[p.sprite] : g.sprites['rune'], p.x, p.y, p.z, p.size ?? .1);
