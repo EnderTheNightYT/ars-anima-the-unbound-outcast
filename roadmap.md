@@ -1,5 +1,6 @@
 # Roadmap
 - [ ] Portal grande y colorido en minimapa y mapa completo; animación de recogida para todas las clases.
+- [ ] Portal más grande y cruzable al entrar en su sprite, lejos del mercader y decorados.
 - [ ] Reproducir y corregir el portal al siguiente nivel que no aparece.
 - [x] Importado otra vez a este proyecto: nube nueva, tablas, Google, canción del piso 1 y hoja del personaje reconstruida.
 - [x] Cámara externa más lejos y más alta (lejanía por defecto 5, hasta 9).
