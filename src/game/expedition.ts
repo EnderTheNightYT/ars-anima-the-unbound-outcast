@@ -2,6 +2,8 @@
 // Engine owns the live state; this module only decides phases, timings and hazards.
 
 export type ExpeditionPhase = 1 | 2 | 3 | 4 | 5 | 6;
+/** Portal silhouette and entry area share world dimensions across cameras. */
+export const PORTAL = { height: 1.8, enterRadius: 1.35, interactRadius: 2, clearance: 3 } as const;
 export const PHASE_NAMES: Record<ExpeditionPhase, string> = {
   1: "Exploración y documentación",
   2: "Descifrado y acceso",
@@ -97,12 +99,12 @@ export function dreadLevel(hasMap: boolean, bossDead: boolean, misreads: number)
   return Math.min(DREAD.max, base + misreads * DREAD.misread);
 }
 
-/** Refuge portal spot: the free cell farthest from benches, decor, merchant and other objects (min 1.6 tiles). */
+/** Refuge portal spot: the free cell farthest from benches, decor, merchant and other objects. */
 export function refugePortalSpot(cands: { x: number; y: number }[], busy: { x: number; y: number }[]): { x: number; y: number } | null {
   let best: { x: number; y: number } | null = null, bestD = -1;
   for (const c of cands) {
     const d = busy.length ? Math.min(...busy.map(b => Math.hypot(b.x - c.x, b.y - c.y))) : 99;
     if (d > bestD) { bestD = d; best = c; }
   }
-  return best && bestD >= 1.6 ? best : null;
+  return best && bestD >= PORTAL.clearance ? best : null;
 }

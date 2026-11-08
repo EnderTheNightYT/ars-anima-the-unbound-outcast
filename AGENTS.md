@@ -11,6 +11,7 @@
 
 ## Architecture
 - Shared pickup gestures live in `src/game/pickup-animation.ts`, separate from class effects; `portal-marker.ts` draws map symbols using global CSS tokens. Why: all classes and cameras share presentation without changing combat or portal access.
+- Portal dimensions/clearance live in `expedition.ts`; engine restores missing eligible portals without resetting collapse, and auto-entry requires line of sight. Why: saved floors stay crossable without teleporting through walls or bypassing objectives.
 - AI, cloud-sync and backend rules live in `src/lib/AGENTS.md`; online multiplayer rules in `src/game/net/AGENTS.md`.
 - Personal lifetime statistics live in browser-safe statistics.ts, keyed by run and weapon instance; cloud.ts merges these records before snapshot writes and restores. Why: resumed runs and repeated pickups must not duplicate totals, and counters survive account backup.
 - Weapon damage examples use weapon-guide.ts with the live weapon and combo tables and explicit neutral-hit assumptions. Why: wiki damage stays tied to playable weapon rules without promising exact encounter outcomes.
